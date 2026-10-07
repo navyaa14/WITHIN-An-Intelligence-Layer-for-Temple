@@ -1,75 +1,599 @@
 # WITHIN
+### An Intelligence Layer for Temple
 
-A product concept for Temple: what else could cerebral blood-flow signals reveal? This folder is the working prototype: the site, the evaluation pipeline, and the evidence. Independent work on public fNIRS/TCD data; not affiliated with Temple, no Temple data, no medical claims.
+> **I didn’t build another health dashboard. I built the intelligence layer I think cerebral wearables are missing.**
 
-## Contents
+**WITHIN** explores a simple question:
 
-| Path | What it is |
-|---|---|
-| `within.html` | The prototype site (one file). Model sections show labelled previews until real results are injected. |
-| `run_all.sh` | One command: downloads data, trains, evaluates, builds `within.live.html` and `within_results.zip`. |
-| `run_on_colab.ipynb` | The same, in Google Colab (no installs, free CPU). |
-| `evidence/` | Real result available now, with the script that reproduces it. |
-| `film/WITHIN_60s.mp4` | The 60-second concept film (voiced). Device: concept rendering; screens: illustrative. |
-| `.gitignore` | Keeps datasets and generated outputs out of Git. |
-| `pipeline/` | Training, evaluation and export code. |
+### What if Temple could go from showing that your physiology changed to helping you understand *what kind of moment it was*?
 
-## Real result already in this folder
+Temple already measures **Flow** — a real-time proxy for cerebral blood-flow dynamics.
 
-PhysioNet mental-fnirs v1.0 (Mukli, Yabluchanskiy & Csipo, 2021; doi:10.13026/zfb2-1g43), middle-cerebral-artery blood-flow velocity (TCD), each n-back block vs the 0-back before it:
+WITHIN proposes a layer on top of that signal:
 
-- **2-back: +4.79% ± 1.23 (mean ± SE), higher in 13 of 14 participants, one-sided Wilcoxon p = 0.00012**
-- 1-back: +0.63% ± 0.68, 8 of 14, p = 0.29 (not significant)
+**Flow → interpretation → context → personalization**
 
-Files: `evidence/physionet_tcd_results.json`, `physionet_tcd_per_participant.csv`, `physionet_tcd_chart.png`. Reproduce: `cd evidence && python compute_tcd.py`. TCD measures velocity in a large artery; it is not Temple's Flow.
+It introduces three product primitives:
 
-## Run it
+| Layer | What it asks | Product output |
+|---|---|---|
+| **FEEL** | *What kind of response is happening?* | Arousal + valence |
+| **THINK** | *How much sustained mental demand is present?* | Cognitive-load state + recovery context |
+| **MOMENTS** | *What was actually happening when physiology changed?* | User-labelled context → personal physiological model |
 
-**Colab (easiest):** open `run_on_colab.ipynb` in Google Colab, upload this zip when asked, run the cells. Download `within_results.zip` at the end.
+---
 
-**Your own machine** (Python 3.10+, `wget`, `zip`):
+## The Idea
 
-```bash
-bash run_all.sh                 # PhysioNet + Tufts automatic; REFED included only if you have Hugging Face access
-NO_REFED=1 bash run_all.sh      # skip REFED: no account needed
-TUFTS=/path/to/size_30sec_150ts_stride_03ts bash run_all.sh   # reuse a local Tufts copy
-FULL=1 bash run_all.sh          # also train the 1D CNN (slow on CPU; installs PyTorch)
+Most wearables stop at measurement.
+
+They tell you that something changed.
+
+WITHIN asks whether a cerebral wearable could eventually help answer:
+
+- Was this response **high or low arousal**?
+- Was it **positive or negative in valence**?
+- Has **cognitive demand stayed unusually elevated**?
+- What was happening when the signal changed?
+- Does this physiological pattern mean something different **for this person**?
+
+The product loop is:
+
+```text
+TEMPLE FLOW
+     ↓
+   WITHIN
+     ↓
+ ┌───────────────┐
+ │ FEEL          │ → arousal + valence
+ │ THINK         │ → cognitive load
+ └───────────────┘
+     ↓
+   MOMENTS
+     ↓
+user-labelled context
+     ↓
+PERSONAL MODEL
+     ↓
+more useful interpretation over time
 ```
 
-What it does, in order:
+The core philosophy:
 
-1. **PhysioNet** (open, ~100 MB): downloads fNIRS + TCD recordings.
-2. **Evidence**: recomputes the TCD result above; `physionet_adapter.py` adds prefrontal HbO from raw fNIRS.
-3. **Tufts fNIRS2MW** (68 participants, ~2.3 GB, public Box folder): cognitive-load models (THINK), official subject buckets.
-4. **REFED** (optional, gated): emotion models (FEEL), fNIRS only. Without Hugging Face access this step is skipped and FEEL keeps the published benchmark.
-5. **Personalization**: does a person's own labelled data improve accuracy? Uses whatever of REFED/Tufts is available.
-6. **Export**: writes `within.live.html` (the site with real numbers), `pipeline/out/SUMMARY.txt` (plain-language results) and `within_results.zip`.
+> **Your physiology notices the moment. You say what it was. WITHIN learns your pattern.**
 
-Outputs go to `pipeline/out/`. Only numbers printed in `SUMMARY.txt` should be quoted.
+---
 
-## Evaluation rules (enforced in code)
+# 01 — FEEL
 
-- **Subject-independent:** splits are grouped by participant; the run fails if anyone is in two of train/validation/test.
-- **Headline metric:** balanced accuracy and macro-F1, next to per-person chance and a shuffled-label baseline.
-- **Stimulus check (REFED):** every participant watched the same 15 videos, so a second test holds out people *and* videos together.
-- **Personalization:** fixed per-person test half; a gain counts only if Holm-corrected Wilcoxon p < 0.05, the 95% bootstrap CI excludes zero, and the personalised model beats chance.
-- **Tufts windows:** 30-second windows that span two workload levels are dropped before training.
-- **REFED files:** labels are read from `annotations/<id>_label.mat` (Hugging Face layout) or `s<id>_label.mat`. The export checks the channel order (HbT ≈ HbO + HbR, HbO varies more than HbR) and warns if it fails; only HbT's position is confirmed by the official code.
-- **Calibration:** each person's signals are scaled with their own unlabelled recordings (a short calibration period in a product).
-- **Analysis assumptions (PhysioNet fNIRS):** Prahl extinction coefficients, DPF 6, 3 cm separation, 0.005–0.1 Hz band-pass, prefrontal channels 1–24. Results in SD units.
+## Understand the type of response
 
-## Datasets and licences
+High physiological activation does not automatically mean stress.
 
-- PhysioNet mental-fnirs v1.0: Mukli, Yabluchanskiy & Csipo (2021), doi:10.13026/zfb2-1g43. PhysioNet Contributor Review Health Data License.
-- Tufts fNIRS2MW: Huang, Wang et al., NeurIPS 2021 Datasets & Benchmarks. CC BY 4.0.
-- REFED: Ning et al., NeurIPS 2025 Datasets & Benchmarks. CC BY-NC-SA 4.0 (non-commercial), gated on Hugging Face.
+Excitement, anticipation, frustration and stress can all involve elevated arousal.
 
-Published benchmark quoted on the site (not our result): REFED fNIRS-only, three classes, within-subject: MDNet 60.53% valence / 66.47% arousal; SVM 57.30% / 64.28%.
+FEEL separates the interpretation into two dimensions:
 
-## Status of results
+```text
+Arousal → How activated is the response?
+Valence → Is the response trending positive or negative?
+```
 
-This is the reproducible source package. The only computed result included is the PhysioNet TCD evidence. FEEL, THINK and personalization numbers appear only after `run_all.sh` (or the Colab notebook) has run; until then the site stays in labelled preview mode. Don't quote model accuracy you haven't generated.
+Instead of:
 
-## Before publishing
+```text
+"You are stressed."
+```
 
-`LINKS.live` is set to the published prototype (turn on sharing on its page). Set `LINKS.github` near the top of the script in `within.html` to show the GitHub button.
+the product can represent something closer to:
+
+```text
+High arousal
+Positive valence
+
+Often associated with:
+excitement · engagement · anticipation
+```
+
+The goal is **not emotion diagnosis**.
+
+The goal is a more useful representation of physiological state.
+
+### Research path
+
+FEEL uses the public **REFED** dataset for the experimental pipeline:
+
+- 32 participants
+- synchronized EEG + fNIRS
+- continuous valence/arousal annotations
+- fNIRS-only path used by WITHIN
+- subject-independent evaluation
+- additional participant + stimulus holdout test
+
+Until this repository's pipeline is run, the UI keeps FEEL model outputs explicitly marked as preview/pending.
+
+---
+
+# 02 — THINK
+
+## Understand sustained mental demand
+
+A single difficult moment is normal.
+
+What becomes more useful is knowing when mental demand stays elevated for a long period.
+
+THINK explores whether cerebral physiology can support a product representation such as:
+
+```text
+COGNITIVE LOAD
+
+72
+HIGH
+
+Elevated for 46 min
+```
+
+followed by an actionable nudge:
+
+```text
+Mental demand has remained elevated.
+Consider a short recovery period.
+```
+
+The value is not the number itself.
+
+The value is turning a physiological pattern into something a person can **understand and act on**.
+
+---
+
+# 03 — MOMENTS
+
+## Physiology detects the change. You add the context.
+
+A population model can only go so far.
+
+Two people can show similar physiological responses for completely different reasons.
+
+So WITHIN closes the loop.
+
+When a meaningful physiological change occurs:
+
+```text
+Your physiology changed.
+
+What was happening?
+
+[ Stress ]
+[ Excitement ]
+[ Focus ]
+[ Frustration ]
+[ Other ]
+```
+
+That label becomes personal context.
+
+Over time:
+
+```text
+population model
+      +
+your labelled moments
+      +
+your physiological baseline
+      ↓
+personal model
+```
+
+The long-term product hypothesis is that **context supplied by the user can make interpretation more useful than physiology alone**.
+
+And importantly, the repository tests that hypothesis instead of simply assuming personalization helps.
+
+---
+
+# From Measurement to Meaning
+
+```text
+                    ┌──────────────┐
+                    │ TEMPLE FLOW  │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │    WITHIN    │
+                    └──────┬───────┘
+                           │
+                ┌──────────┴──────────┐
+                ▼                     ▼
+          ┌───────────┐         ┌───────────┐
+          │   FEEL    │         │   THINK   │
+          │           │         │           │
+          │ Arousal   │         │ Cognitive │
+          │ Valence   │         │   Load    │
+          └─────┬─────┘         └─────┬─────┘
+                └──────────┬───────────┘
+                           ▼
+                     ┌───────────┐
+                     │  MOMENTS  │
+                     └─────┬─────┘
+                           ▼
+                    User Context
+                           │
+                           ▼
+                    Personal Model
+```
+
+**State → Context → Personalization**
+
+That is the intelligence layer.
+
+---
+
+# What I Actually Built
+
+This repository is more than a product mockup.
+
+It contains the product experience, research evidence, evaluation pipeline and reproducible experiment framework behind the concept.
+
+### Product
+
+- Temple-style interactive product experience
+- FEEL interface
+- THINK interface
+- MOMENTS timeline
+- personal-model flow
+- research/evidence views
+- explicit preview vs real-result states
+- 60-second voiced concept film
+
+### ML / Evaluation
+
+- REFED fNIRS emotion pipeline
+- Tufts fNIRS2MW workload pipeline
+- PhysioNet fNIRS/TCD adapter
+- SVM and XGBoost baselines
+- optional 1D CNN
+- participant-independent splitting
+- shuffled-label baseline
+- balanced accuracy
+- macro-F1
+- participant-level chance
+- stimulus-holdout evaluation
+- personalization experiment
+- bootstrap confidence intervals
+- Holm-corrected statistical testing
+- automatic result injection into the product experience
+
+---
+
+# One Real Result Already Reproduced
+
+Before asking whether THINK could work on a cerebral wearable, I wanted to test the most basic premise:
+
+### Does cerebral blood-flow velocity change as cognitive workload becomes harder?
+
+Using the public **PhysioNet mental-fnirs v1.0** dataset, the repository reproduces the TCD workload analysis.
+
+### Hardest workload condition — 2-back
+
+**Average cerebral blood-flow velocity change**
+
+# **+4.79%**
+
+**13 / 14 participants increased**
+
+**one-sided Wilcoxon p = 0.00012**
+
+For comparison:
+
+| Task | Mean change ± SE | Participants ↑ | p-value |
+|---|---:|---:|---:|
+| 1-back | +0.63% ± 0.68 | 8 / 14 | 0.29 |
+| **2-back** | **+4.79% ± 1.23** | **13 / 14** | **0.00012** |
+
+Reproduce it with:
+
+```bash
+cd evidence
+python compute_tcd.py
+```
+
+Outputs:
+
+```text
+evidence/
+├── physionet_tcd_results.json
+├── physionet_tcd_per_participant.csv
+└── physionet_tcd_chart.png
+```
+
+### Important
+
+This is **TCD middle-cerebral-artery blood-flow velocity**.
+
+It is **not Temple Flow**.
+
+The result supports investigating the hypothesis on actual Temple hardware. It does not validate WITHIN on Temple.
+
+---
+
+# Evaluation Designed to Be Hard to Fool
+
+A nice-looking accuracy number was not enough.
+
+The evaluation framework deliberately makes the models earn their results.
+
+### 1. Participant-independent testing
+
+Entire people are held out.
+
+```text
+TRAIN PEOPLE
+     ≠
+VALIDATION PEOPLE
+     ≠
+TEST PEOPLE
+```
+
+The pipeline fails if a participant appears in more than one split.
+
+This prevents nearby windows from the same person's recording from leaking across train and test sets.
+
+---
+
+### 2. Balanced accuracy + macro-F1
+
+Headline metrics are reported alongside:
+
+- participant-level chance
+- shuffled-label baseline
+
+So performance is compared against something meaningful rather than an arbitrary percentage.
+
+---
+
+### 3. REFED participant + video holdout
+
+REFED participants all view the same emotional stimuli.
+
+A model could potentially learn properties of the videos rather than emotion-related physiology.
+
+So WITHIN includes a stricter evaluation where:
+
+```text
+test participant = unseen
+AND
+test video = unseen
+```
+
+---
+
+### 4. Clean Tufts workload windows
+
+Thirty-second windows spanning more than one workload level are **removed before training**.
+
+No mixed-label boundary windows are used as clean examples.
+
+---
+
+### 5. Personalization must prove itself
+
+WITHIN does not assume personalization helps.
+
+For a held-out individual:
+
+```text
+population model
+       ↓
++ 1 labelled moment
++ 2 labelled moments
++ 4 labelled moments
++ 8 labelled moments
+       ↓
+same untouched personal test set
+```
+
+A gain is considered reliable only when:
+
+- Holm-corrected Wilcoxon **p < 0.05**
+- 95% bootstrap confidence interval excludes zero
+- personalized performance remains above chance
+
+If that does not happen, the system should say so.
+
+---
+
+# Datasets
+
+### REFED — FEEL
+
+**Ning et al., NeurIPS 2025 Datasets & Benchmarks**
+
+- 32 participants
+- 15 emotion-inducing trials per participant
+- synchronized EEG + fNIRS
+- continuous valence/arousal annotation
+- fNIRS-only path used here
+- CC BY-NC-SA 4.0
+- gated through Hugging Face
+
+Published fNIRS-only benchmark quoted in the prototype:
+
+| Model | Valence | Arousal |
+|---|---:|---:|
+| MDNet | 60.53% | 66.47% |
+| SVM | 57.30% | 64.28% |
+
+Three-class chance ≈ 33%.
+
+**These are published REFED results — not results produced by this repository.**
+
+---
+
+### Tufts fNIRS2MW — THINK
+
+**Huang, Wang et al., NeurIPS 2021 Datasets & Benchmarks**
+
+- 68 eligible participants
+- forehead fNIRS
+- 5.2 Hz
+- 0-back / 1-back / 2-back / 3-back
+- public 30-second windows
+- CC BY 4.0
+
+The downloader in this repository covers all **68 eligible participant files**.
+
+---
+
+### PhysioNet mental-fnirs — physiological bridge
+
+**Mukli, Yabluchanskiy & Csipo, 2021**
+
+Used for:
+
+- TCD cerebral blood-flow velocity analysis
+- raw fNIRS workload analysis
+- prefrontal HbO processing
+
+The TCD result above is the real computed result currently included in the repository.
+
+---
+
+# Run the Entire Experiment
+
+## Google Colab — easiest
+
+Open:
+
+```text
+run_on_colab.ipynb
+```
+
+Run the notebook from top to bottom.
+
+REFED is the only gated dataset. If you have access, authenticate when prompted.
+
+The pipeline handles the remaining workflow.
+
+At the end it creates:
+
+```text
+within_results.zip
+```
+
+containing the generated results and updated experience.
+
+---
+
+## Local
+
+Requirements:
+
+```text
+Python 3.10+
+wget
+zip
+```
+
+Run everything:
+
+```bash
+bash run_all.sh
+```
+
+Skip gated REFED:
+
+```bash
+NO_REFED=1 bash run_all.sh
+```
+
+Reuse an existing Tufts dataset:
+
+```bash
+TUFTS=/path/to/size_30sec_150ts_stride_03ts bash run_all.sh
+```
+
+Include the optional 1D CNN:
+
+```bash
+FULL=1 bash run_all.sh
+```
+
+---
+
+# What the Pipeline Produces
+
+```text
+Public neurophysiology datasets
+             │
+             ▼
+       preprocessing
+             │
+             ▼
+ participant-level splits
+             │
+             ▼
+     SVM / XGBoost / CNN
+             │
+             ▼
+     leakage checks
+             │
+             ▼
+ balanced accuracy + macro-F1
+             │
+             ├──────────────► shuffled-label baseline
+             │
+             ├──────────────► stimulus holdout
+             │
+             └──────────────► personalization test
+             │
+             ▼
+       SUMMARY.txt
+             │
+             ▼
+     within.live.html
+```
+
+Only results written into `SUMMARY.txt` should be quoted as results from this repository.
+
+---
+
+# Repository Structure
+
+```text
+WITHIN/
+│
+├── within.html
+│   └── interactive product prototype
+│
+├── film/
+│   └── WITHIN_60s.mp4
+│       60-second voiced concept film
+│
+├── run_all.sh
+│   └── end-to-end experiment runner
+│
+├── run_on_colab.ipynb
+│   └── one-run Google Colab workflow
+│
+├── evidence/
+│   ├── EVIDENCE.md
+│   ├── compute_tcd.py
+│   ├── physionet_tcd_results.json
+│   ├── physionet_tcd_per_participant.csv
+│   └── physionet_tcd_chart.png
+│
+└── pipeline/
+    ├── refed_train.py
+    ├── tufts_train.py
+    ├── tufts_download.py
+    ├── physionet_adapter.py
+    ├── personalize.py
+    ├── export_demo.py
+    ├── summarize_results.py
+    ├── common.py
+    └── nets.py
+```
+
+---
+
+
