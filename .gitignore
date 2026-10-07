@@ -1,0 +1,21 @@
+# datasets (gigabytes): never commit
+REFED-dataset/
+pipeline/tufts_30s/
+pipeline/physionet.org/
+tufts_data/
+# generated outputs
+pipeline/out/
+within.live.html
+within_results.zip
+within_data.json
+*.part
+*.npz
+# python / OS noise
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+# secrets
+.env
+*token*
+*.log

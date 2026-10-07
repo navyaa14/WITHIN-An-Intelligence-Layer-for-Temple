@@ -1,0 +1,23 @@
+{
+ "source": "PhysioNet mental-fnirs v1.0, TCD_data/Summary-statistics_MCA.csv (Mukli, Yabluchanskiy & Csipo, 2021)",
+ "doi": "10.13026/zfb2-1g43",
+ "measure": "% change in mean middle-cerebral-artery blood-flow velocity (L/R average), n-back vs preceding 0-back",
+ "one_back": {
+  "mean_pct": 0.631,
+  "sem_pct": 0.682,
+  "median_pct": 0.926,
+  "n": 14,
+  "n_increased": 8,
+  "p_wilcoxon_one_sided": 0.29150390625
+ },
+ "two_back": {
+  "mean_pct": 4.794,
+  "sem_pct": 1.225,
+  "median_pct": 2.997,
+  "n": 14,
+  "n_increased": 13,
+  "p_wilcoxon_one_sided": 0.0001220703125
+ },
+ "two_back_vs_one_back_p_wilcoxon_one_sided": 0.0001220703125,
+ "note": "TCD measures blood-flow velocity in a large artery. It is not Temple's Flow."
+}

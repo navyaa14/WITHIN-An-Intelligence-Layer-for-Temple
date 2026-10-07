@@ -1,0 +1,1076 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WITHIN: a product concept for Temple</title>
+<meta name="description" content="A product concept for Temple: what if Flow could also tell you how your mind is responding? Prototype backed by public fNIRS data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFECE5; --paper-2:#E6E2D9; --ink:#191917; --ink-2:#55534D; --ink-3:#8F8B82;
+  --rule:rgba(25,25,23,.16); --rule-strong:rgba(25,25,23,.42);
+  --oxy:#A3201F; --deoxy:#2F4A80;
+  /* device */
+  --dev:#0E0E0D; --dev-2:#1A1A18; --dev-3:#262623; --dev-ink:#EDEAE3; --dev-ink-2:#A8A49B; --dev-ink-3:#6F6C65; --dev-rule:rgba(237,234,227,.12); --dev-oxy:#E2574B; --dev-deoxy:#8EA4DA;
+  --font:"Hanken Grotesk", ui-sans-serif, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --gutter:clamp(1.25rem, 4vw, 4rem);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#121211; --paper-2:#1B1B19; --ink:#ECE8E0; --ink-2:#B3AFA6; --ink-3:#7A766E;
+    --rule:rgba(236,232,224,.15); --rule-strong:rgba(236,232,224,.4);
+    --oxy:#E2574B; --deoxy:#8EA4DA; --dev:#050505; --dev-2:#121211; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121211; --paper-2:#1B1B19; --ink:#ECE8E0; --ink-2:#B3AFA6; --ink-3:#7A766E;
+  --rule:rgba(236,232,224,.15); --rule-strong:rgba(236,232,224,.4);
+  --oxy:#E2574B; --deoxy:#8EA4DA; --dev:#050505; --dev-2:#121211; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth; scroll-padding-top:calc(64px + env(safe-area-inset-top,0px)); -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--font); font-size:1.0625rem; line-height:1.55;
+  -webkit-font-smoothing:antialiased; font-feature-settings:"tnum" 1; overflow-x:hidden}
+img,svg,canvas{max-width:100%; display:block}
+a{color:inherit} button{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--oxy); outline-offset:4px; border-radius:2px}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+section{position:relative}
+
+.label{font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase; font-weight:500; color:var(--ink-2)}
+.label.quiet{color:var(--ink-3)}
+.h1{font-size:clamp(2.5rem,5.4vw,6.2rem); font-weight:300; letter-spacing:-.045em; line-height:.92; text-transform:uppercase; margin:0}
+.h2{font-size:clamp(2.1rem,5.2vw,5.2rem); font-weight:300; letter-spacing:-.035em; line-height:.95; text-transform:uppercase; margin:0}
+.mega{font-size:clamp(3.2rem,8vw,8rem); font-weight:300; letter-spacing:-.06em; line-height:.82; text-transform:uppercase; margin:0 0 0 -.04em}
+.lede{font-size:clamp(1.1rem,1.6vw,1.4rem); line-height:1.4; color:var(--ink-2); max-width:30ch; margin:0}
+.small{font-size:.8125rem; color:var(--ink-3); line-height:1.5; max-width:60ch}
+.num{font-variant-numeric:tabular-nums lining-nums}
+
+.cta{display:inline-flex; align-items:center; gap:.9rem; background:none; border:0; padding:.9rem 0; cursor:pointer; color:var(--ink);
+  font-size:.8125rem; letter-spacing:.16em; text-transform:uppercase; font-weight:500; text-decoration:none; border-bottom:1px solid var(--ink); transition:gap .4s var(--ease)}
+.cta:hover{gap:1.4rem}
+.cta[disabled]{opacity:.35; cursor:not-allowed}
+.ghost{background:none; border:1px solid var(--rule-strong); border-radius:999px; padding:.55rem 1.05rem; cursor:pointer; font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase; font-weight:500}
+.ghost:hover{border-color:var(--ink)}
+
+/* nav */
+.nav{position:fixed; inset:0 0 auto 0; z-index:50; padding-top:env(safe-area-inset-top,0px); background:color-mix(in srgb, var(--paper) 94%, transparent); transition:box-shadow .4s}
+.nav.scrolled{box-shadow:0 1px 0 var(--rule)}
+.nav-in{display:flex; align-items:center; justify-content:space-between; height:64px; padding-inline:var(--gutter)}
+.wordmark{font-weight:600; letter-spacing:.32em; font-size:.75rem; text-decoration:none}
+.nav ul{display:flex; gap:clamp(.9rem,3vw,2.6rem); list-style:none; margin:0; padding:0}
+.nav ul a,.nav ul button{font-size:.6875rem; letter-spacing:.18em; text-decoration:none; color:var(--ink-3); font-weight:500; background:none; border:0; padding:0; cursor:pointer; text-transform:uppercase}
+.nav ul a:hover,.nav ul a.on,.nav ul button:hover{color:var(--ink)}
+
+/* hero */
+#top{min-height:100vh; min-height:100svh; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr); align-items:center; gap:3rem var(--gutter);
+  padding:calc(64px + 4vh) var(--gutter) 5vh; overflow:hidden}
+#flow{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+.hero{position:relative; z-index:1}
+.hero .pre{margin:1.4rem 0 1.8rem; font-size:clamp(1rem,1.3vw,1.15rem); color:var(--ink-2); max-width:44ch}
+.hero .pre b{font-weight:500; color:var(--ink)}
+.intro{display:flex; align-items:baseline; gap:1.2rem; margin:2.4rem 0 1.4rem}
+.intro .wm{font-size:clamp(1.3rem,2vw,1.8rem); font-weight:500; letter-spacing:.24em}
+.pillars{display:grid; grid-template-columns:repeat(2,minmax(0,15rem)); border-top:1px solid var(--rule); margin-bottom:2rem}
+.pillars div{padding:1rem 1.2rem 1rem 0}
+.pillars div + div{border-left:1px solid var(--rule); padding-left:1.2rem}
+.pillars b{display:block; font-weight:500; letter-spacing:.2em; font-size:.9rem}
+.pillars span{font-size:.875rem; color:var(--ink-2)}
+.hero-note{margin-top:1.6rem}
+.hero-phone{position:relative; z-index:1; justify-self:center}
+
+/* phone */
+.phone{--w:min(330px, 84vw); --w2:min(390px, 30vw, calc((100svh - 140px) * .474)); width:var(--w); aspect-ratio:9/19; background:var(--dev); border-radius:calc(var(--w) * .15); padding:10px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 40px 80px -30px rgba(20,18,14,.45), inset 0 0 0 1.5px #3a3935; color:var(--dev-ink); position:relative}
+.scr{position:absolute; inset:10px; border-radius:calc(var(--w) * .125); background:var(--dev-2); overflow:hidden; display:flex; flex-direction:column}
+.screen{position:absolute; inset:0; padding:46px 20px 18px; display:flex; flex-direction:column; opacity:0; visibility:hidden; transition:opacity .5s var(--ease), visibility .5s}
+.screen.on{opacity:1; visibility:visible}
+.sb{position:absolute; top:12px; left:24px; right:24px; display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:var(--dev-ink); z-index:2}
+.sb::after{content:""; position:absolute; left:50%; top:-3px; width:84px; height:22px; margin-left:-42px; background:#000; border-radius:12px}
+.p-title{font-size:24px; font-weight:500; letter-spacing:-.01em; margin:8px 0 2px}
+.p-sub{font-size:11px; color:var(--dev-ink-3); letter-spacing:.12em; text-transform:uppercase}
+.p-lab{font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--dev-ink-2); font-weight:500}
+.p-card{background:var(--dev-3); border-radius:18px; padding:14px 16px}
+.p-big{font-size:58px; font-weight:300; letter-spacing:-.05em; line-height:.9}
+.p-mid{font-size:34px; font-weight:300; letter-spacing:-.04em; line-height:.95}
+.p-cat{font-size:10px; letter-spacing:.18em; font-weight:600; margin-top:5px}
+.p-trace{width:100%; height:56px}
+.p-rule{height:1px; background:var(--dev-rule); margin:12px 0}
+.tabs{display:flex; gap:18px; margin:14px 0 14px; border-bottom:1px solid var(--dev-rule)}
+.tabs button{background:none; border:0; padding:0 0 8px; font-size:10px; letter-spacing:.18em; font-weight:600; color:var(--dev-ink-3); cursor:pointer; border-bottom:1.5px solid transparent; margin-bottom:-1px}
+.tabs button.on{color:var(--dev-ink); border-color:var(--dev-ink)}
+.mind-row{display:flex; align-items:center; justify-content:space-between; width:100%; background:var(--dev-3); border:0; border-radius:18px; padding:16px; cursor:pointer; color:var(--dev-ink); text-align:left}
+.mind-row:hover{background:#2f2f2b}
+.new{font-size:8.5px; letter-spacing:.16em; font-weight:700; color:var(--dev-2); background:var(--dev-oxy); border-radius:999px; padding:3px 7px; margin-left:8px; vertical-align:2px}
+.row{display:flex; justify-content:space-between; align-items:center}
+.livedot{display:inline-flex; align-items:center; gap:6px}
+.livedot::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--dev-oxy); animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.35; transform:scale(.8)}50%{opacity:1; transform:scale(1.15)}}
+.why{margin-top:auto; border-top:1px solid var(--dev-rule); padding-top:10px}
+.why summary{font-size:11px; color:var(--dev-ink-2); cursor:pointer; list-style:none}
+.why summary::-webkit-details-marker{display:none}
+.why ul{margin:8px 0 0; padding:0; list-style:none; font-size:11px; color:var(--dev-ink-2)}
+.why li{padding:4px 0}
+.why li::before{content:"â€” "; color:var(--dev-ink-3)}
+.p-cont{position:relative; height:16px; margin:12px 0 4px}
+.p-cont i{position:absolute; left:0; right:0; top:7px; height:1px; background:var(--dev-rule)}
+.p-cont b{position:absolute; top:3px; width:9px; height:9px; margin-left:-4.5px; border-radius:50%; background:var(--dev-oxy)}
+.rec{background:var(--dev-ink); color:var(--dev-2); border-radius:18px; padding:14px 16px; margin-top:auto}
+.rec .p-lab{color:#55534D}
+.rec p{margin:6px 0 10px; font-size:12px; line-height:1.4}
+.rec button{background:var(--dev-2); color:var(--dev-ink); border:0; border-radius:999px; padding:8px 14px; font-size:10px; letter-spacing:.14em; font-weight:600; cursor:pointer}
+.mo-list{list-style:none; margin:0; padding:0}
+.mo-list li{display:grid; grid-template-columns:44px 1fr auto; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid var(--dev-rule); font-size:12px}
+.mo-list .t{color:var(--dev-ink-3); font-size:11px}
+.mo-list .s{font-size:10px; color:var(--dev-ink-2); letter-spacing:.08em}
+.mo-list button{all:unset; display:contents; cursor:pointer}
+.mo-list li.key{color:var(--dev-ink)}
+.mo-list li.key .n::after{content:"Tap to label"; display:block; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--dev-oxy); margin-top:2px}
+.sheet{position:absolute; left:0; right:0; bottom:0; background:var(--dev-3); border-radius:22px 22px 0 0; padding:18px 18px 22px; transform:translateY(105%); transition:transform .5s var(--ease); z-index:3}
+.sheet.on{transform:none}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
+.chips button{background:none; border:1px solid var(--dev-rule); color:var(--dev-ink); border-radius:999px; padding:7px 11px; font-size:10px; letter-spacing:.12em; font-weight:600; cursor:pointer}
+.chips button:hover,.chips button.on{background:var(--dev-ink); color:var(--dev-2)}
+.saved{font-size:12px; line-height:1.45; color:var(--dev-ink-2); margin-top:12px; min-height:3em}
+.concept{margin-top:1rem; text-align:center}
+
+/* mind tour */
+#mind{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:0 var(--gutter); padding:0 var(--gutter)}
+.chap{min-height:100vh; min-height:100svh; display:flex; flex-direction:column; justify-content:center; padding:14vh 0}
+.chap .lede{margin-top:1.6rem; max-width:26ch; color:var(--ink); font-weight:300; font-size:clamp(1.15rem,1.7vw,1.6rem); line-height:1.25}
+.defs{margin-top:2.6rem; border-top:1px solid var(--rule); max-width:30rem}
+.defs div{display:grid; grid-template-columns:8rem 1fr; padding:1rem 0; border-bottom:1px solid var(--rule)}
+.defs b{font-weight:500; letter-spacing:.16em; font-size:.8rem; text-transform:uppercase}
+.defs span{color:var(--ink-2)}
+.basis{margin-top:1.6rem; opacity:.8; display:flex; flex-wrap:wrap; align-items:center; gap:.5rem 1.4rem}
+.basis a{font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase; font-weight:500}
+.stickcol{position:relative}
+.stickphone .phone{--w:max(330px, var(--w2))}
+.stickphone{position:sticky; top:0; height:100vh; height:100svh; display:grid; place-items:center; align-content:center}
+.inline-phone{display:none; margin-top:3rem}
+
+/* why this may transfer */
+.transfer{margin-top:3.2rem; padding-top:1.4rem; border-top:1px solid var(--ink); max-width:36rem}
+.tx-list{margin-top:1rem}
+.tx-list div{display:grid; grid-template-columns:5.5rem 1fr; gap:1rem; padding:.55rem 0; border-bottom:1px solid var(--rule); font-size:.95rem}
+.tx-list b{font-weight:500; letter-spacing:.14em; font-size:.72rem; text-transform:uppercase; padding-top:.2rem}
+.tx-list span{color:var(--ink-2)}
+.tx-chart svg{width:100%; height:auto; margin-top:2rem; overflow:visible}
+.tx-chart text{font-family:var(--font); fill:var(--ink-2)}
+.tx-claim{font-size:1.05rem; line-height:1.45; margin:1.6rem 0 .7rem; max-width:46ch; color:var(--ink)}
+.sim{display:inline-block; font-size:.625rem; letter-spacing:.14em; font-weight:600; text-transform:uppercase; color:var(--oxy); border:1px solid currentColor; padding:.3rem .55rem; border-radius:2px}
+
+/* personalization */
+.pz svg{width:100%; max-width:860px; height:auto; margin-top:2rem; overflow:visible}
+.pz text{font-family:var(--font); fill:var(--ink-2)}
+
+/* layers */
+#layers{padding:20vh var(--gutter) 16vh; border-top:1px solid var(--rule)}
+#layers .h2{max-width:22ch; font-size:clamp(1.9rem,4.4vw,4.4rem)}
+.stack{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:9vh; border-top:1px solid var(--ink)}
+.layer{padding:2rem 2rem 0 0; position:relative}
+.layer + .layer{padding-left:2rem; border-left:1px solid var(--rule)}
+.layer .k{font-size:.6875rem; letter-spacing:.16em; color:var(--ink-3); font-weight:500}
+.layer b{display:block; overflow-wrap:anywhere; font-size:clamp(1.6rem,2.7vw,2.7rem); font-weight:300; letter-spacing:-.03em; text-transform:uppercase; margin:.8rem 0 .6rem; line-height:1}
+.layer span{color:var(--ink-2)}
+.layer .arrow{position:absolute; right:-.6rem; top:2.6rem; color:var(--ink-3); background:var(--paper); padding:0 .2rem; z-index:1}
+
+/* loop */
+#loop{padding:16vh var(--gutter) 16vh; border-top:1px solid var(--rule)}
+.steps{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin:8vh -1.4rem 0}
+.st{padding:0 1.4rem; border-left:1px solid var(--rule)}
+.st:first-child{border-left:0}
+.st svg{width:100%; aspect-ratio:1; margin-bottom:1.4rem}
+.st b{display:block; font-size:clamp(1.4rem,2.6vw,2.3rem); font-weight:300; letter-spacing:-.03em; line-height:1.05; text-transform:uppercase}
+.st .label{display:block; margin-top:.7rem}
+.st .tags{display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.9rem}
+.st .tags span{font-size:.6875rem; letter-spacing:.12em; border:1px solid var(--rule-strong); border-radius:999px; padding:.25rem .6rem}
+.st.final b{font-weight:400}
+.st-arrow{display:none}
+/* evidence */
+#evidence{padding:18vh 0 10vh; border-top:1px solid var(--rule)}
+.ev-head{padding:0 var(--gutter); display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); gap:2rem var(--gutter); align-items:end}
+.ev-head .lede{max-width:36ch}
+.ev{margin-top:10vh}
+.ev-bar{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem 2rem; padding:1.1rem var(--gutter); border-top:1px solid var(--rule); border-bottom:1px solid var(--rule)}
+.ev-bar .ids{display:flex; flex-wrap:wrap; gap:.4rem 1.8rem; align-items:center}
+.live{display:inline-flex; align-items:center; gap:.6rem; color:var(--ink)}
+.live::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--oxy); animation:breathe 2.6s ease-in-out infinite}
+.live.preview::before{background:none; border:1px solid var(--ink-3); animation:none}
+.controls{display:flex; align-items:center; gap:.8rem}
+.time{font-size:.75rem; color:var(--ink-3); min-width:9ch; text-align:right}
+.trace-wrap{position:relative; height:30vh; min-height:200px}
+.trace-wrap canvas{width:100%; height:100%}
+.legend{position:absolute; left:var(--gutter); top:1rem; display:flex; gap:1.4rem}
+.legend span{display:inline-flex; align-items:center; gap:.5rem}
+.legend span::before{content:""; width:18px; height:2px; background:var(--c)}
+.scrub{position:absolute; left:var(--gutter); right:var(--gutter); bottom:.2rem}
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:24px; background:transparent; cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px; background:var(--rule-strong)}
+input[type=range]::-moz-range-track{height:1px; background:var(--rule-strong)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:11px; height:11px; border-radius:50%; background:var(--ink); margin-top:-5px}
+input[type=range]::-moz-range-thumb{width:11px; height:11px; border:0; border-radius:50%; background:var(--ink)}
+.ev-body{display:grid; grid-template-columns:minmax(0,4fr) minmax(0,3fr) minmax(0,4fr); gap:3rem var(--gutter); padding:4rem var(--gutter) 0; align-items:start}
+.read{display:grid; gap:2rem}
+.read .v{font-size:clamp(3rem,6vw,5.6rem); font-weight:300; letter-spacing:-.05em; line-height:.9; margin:.6rem 0 .3rem}
+.read .c{font-size:.8125rem; letter-spacing:.2em; font-weight:500}
+.plane{width:100%; aspect-ratio:1; max-width:380px}
+.plane text{font-family:var(--font); font-size:13px; letter-spacing:.16em; fill:var(--ink-2); font-weight:500}
+.halo{transform-box:fill-box; transform-origin:center; animation:halo 3.2s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:scale(1); opacity:.18}50%{transform:scale(1.9); opacity:0}}
+.rv-line{display:flex; justify-content:space-between; gap:1rem; padding:.8rem 0; border-top:1px solid var(--rule); font-size:clamp(1.1rem,1.8vw,1.6rem); font-weight:300; text-transform:uppercase}
+.rv-line span:first-child{color:var(--ink-3)}
+.rv-report{margin-top:1.6rem}
+.rv-report .rv-line{opacity:0; transform:translateY(10px); transition:opacity .8s var(--ease), transform .8s var(--ease)}
+.rv-report.on .rv-line{opacity:1; transform:none}
+.rv-report.on .rv-line:nth-of-type(2){transition-delay:.25s}
+.verdict{padding:0 var(--gutter); margin-top:6vh; font-size:clamp(3.6rem,13vw,13rem); font-weight:300; letter-spacing:-.06em; line-height:.82; text-transform:uppercase; opacity:0; transform:translateY(20px); transition:opacity 1.1s var(--ease) .6s, transform 1.1s var(--ease) .6s}
+.verdict.on{opacity:1; transform:none}
+.verdict:empty{margin:0}
+.source{padding:0 var(--gutter); margin-top:1.6rem; opacity:0; transition:opacity .9s var(--ease) 1.3s}
+.source.on{opacity:1}
+.think-ev{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:2rem var(--gutter); padding:3.4rem var(--gutter) 0; align-items:center}
+.l-num{font-size:clamp(5rem,13vw,11rem); font-weight:300; letter-spacing:-.07em; line-height:.8}
+.l-cat{font-size:.9rem; letter-spacing:.26em; font-weight:500; margin-top:.8rem}
+.cont{position:relative; margin-top:2rem; height:34px; max-width:520px}
+.cont .track{position:absolute; left:0; right:0; top:16px; height:1px; background:var(--rule-strong)}
+.cont .dot{position:absolute; top:11px; width:11px; height:11px; margin-left:-5.5px; border-radius:50%; background:var(--oxy); transition:left .5s var(--ease)}
+.cont .ends{position:absolute; left:0; right:0; top:28px; display:flex; justify-content:space-between}
+.task{display:flex; gap:clamp(1rem,3vw,2.4rem)}
+.task span{font-size:.75rem; letter-spacing:.2em; font-weight:500; color:var(--ink-3); padding-bottom:.5rem; border-bottom:1px solid transparent; text-transform:uppercase}
+.task span.on{color:var(--ink); border-color:var(--ink)}
+.ev-foot{padding:2.4rem var(--gutter) 0}
+.research-cta{padding:10vh var(--gutter) 0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.6rem; }
+
+/* research dialog */
+dialog.research{position:fixed; inset:0; width:100%; max-width:none; height:100%; max-height:none; margin:0; border:0; padding:0; background:var(--paper); color:var(--ink); overflow:auto}
+dialog.research::backdrop{background:var(--paper)}
+dialog[open]{animation:fadein .5s var(--ease)}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.rs-in{padding:calc(5rem + env(safe-area-inset-top,0px)) var(--gutter) calc(6rem + env(safe-area-inset-bottom,0px)); max-width:1400px}
+.rs-close{position:fixed; top:calc(1.2rem + env(safe-area-inset-top,0px)); right:var(--gutter); background:var(--paper); z-index:2}
+.rs-sec{padding:4rem 0; border-top:1px solid var(--rule)}
+.rs-sec:first-of-type{border-top:0}
+.figs{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:2.4rem}
+.fig{padding-left:1.4rem; border-left:1px solid var(--rule)}
+.fig:first-child{border-left:0; padding-left:0}
+.fig b{display:block; font-size:clamp(2.6rem,5.6vw,5.6rem); font-weight:300; letter-spacing:-.055em; line-height:.9; white-space:nowrap}
+.fig b small{font-size:.32em; letter-spacing:0; margin-left:.12em}
+.fig .label{display:block; margin-top:1rem}
+.bench{display:grid; grid-template-columns:minmax(0,4fr) minmax(0,8fr); gap:2rem var(--gutter); align-items:start}
+.bench-row{display:grid; grid-template-columns:minmax(6rem,1fr) 2fr 2fr; align-items:end; gap:1.5rem; padding:1.6rem 0 1.3rem; border-top:1px solid var(--rule)}
+.bench-row .model{font-size:.8125rem; letter-spacing:.2em; font-weight:500; padding-bottom:.5rem; text-transform:uppercase}
+.bench-row b{display:block; font-size:clamp(2.2rem,4.6vw,4.4rem); font-weight:300; letter-spacing:-.05em; line-height:.9}
+.bench-row b small{font-size:.38em}
+.bench-row .label{display:block; margin-top:.6rem}
+.cols{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2.4rem var(--gutter); margin-top:2rem}
+.cols h4{margin:0 0 .8rem}
+.cols p{margin:0 0 .8rem; font-size:.9rem; color:var(--ink-2); max-width:44ch}
+
+/* final */
+#final{min-height:100vh; min-height:100svh; display:flex; flex-direction:column; justify-content:center; padding:20vh var(--gutter) 12vh; border-top:1px solid var(--rule)}
+#final .h2{font-size:clamp(2.6rem,7.6vw,8.4rem); letter-spacing:-.045em; line-height:.9}
+#final .lede{margin-top:2.6rem; max-width:34ch}
+.fin2{margin-top:18vh; opacity:0; transform:translateY(20px); transition:opacity 1.4s var(--ease), transform 1.4s var(--ease)}
+.fin2.on{opacity:1; transform:none}
+.fin-foot{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.6rem 3rem; margin-top:7vh}
+.fin-foot .links{display:flex; gap:2.4rem; flex-wrap:wrap}
+footer{padding:2rem var(--gutter) 3rem; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem}
+
+.in{opacity:0; transform:translateY(18px); transition:opacity 1s var(--ease), transform 1s var(--ease)}
+.in.seen{opacity:1; transform:none}
+
+@media (max-width:980px){
+  #top{grid-template-columns:1fr; padding-top:calc(64px + 6vh)}
+  .hero-phone{justify-self:start}
+  #mind{grid-template-columns:1fr}
+  .stickcol{display:none}
+  .inline-phone{display:block}
+  .chap{min-height:auto; padding:14vh 0 4vh}
+  .stack{grid-template-columns:1fr}
+  .layer,.layer + .layer{padding:2rem 0; border-left:0; border-bottom:1px solid var(--rule)}
+  .layer .arrow{display:none}
+  .steps{grid-template-columns:1fr; margin-inline:0}
+  .st{border-left:0; padding:0; display:grid; grid-template-columns:40% 1fr; gap:1.4rem; align-items:center}
+  .st svg{margin:0}
+  .st-arrow{display:block; padding:.6rem 0 .6rem 18%; color:var(--ink-3)}
+  .ev-head{grid-template-columns:1fr}
+  .ev-body{grid-template-columns:1fr 1fr}
+  .ev-body .rv{grid-column:1/-1}
+  .think-ev{grid-template-columns:1fr}
+  .figs{grid-template-columns:repeat(2,minmax(0,1fr)); row-gap:2.4rem}
+  .fig:nth-child(3){border-left:0; padding-left:0}
+  .bench{grid-template-columns:1fr}
+  .cols{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .nav ul{gap:.85rem}
+  .nav ul a,.nav ul button{letter-spacing:.1em; font-size:.625rem}
+  .wordmark{letter-spacing:.2em}
+  .pillars{grid-template-columns:1fr 1fr}
+  .ev-body{grid-template-columns:1fr}
+  .bench-row{grid-template-columns:1fr 1fr}
+  .bench-row .model{grid-column:1/-1; padding:0}
+  .hero-phone{justify-self:center}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; transition-delay:0s !important}
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav" aria-label="Sections">
+  <div class="nav-in">
+    <a class="wordmark" href="#top">WITHIN</a>
+    <ul>
+      <li><a href="#feel">Feel</a></li>
+      <li><a href="#think">Think</a></li>
+      <li><a href="#moments">Moments</a></li>
+      <li><a href="#evidence">Evidence</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+<!-- 1. THE WHOLE PROPOSAL IN ONE VIEWPORT -->
+<section id="top">
+  <canvas id="flow" aria-hidden="true"></canvas>
+  <div class="hero">
+    <div class="label">A product concept for Temple</div>
+    <p class="pre"><b>Temple measures Flow:</b> a real-time proxy for cerebral blood flow, read from your temple.</p>
+    <h1 class="h1">What if it could also tell you how your mind is responding?</h1>
+    <div class="intro"><span class="label quiet">Introducing</span><span class="wm">WITHIN</span></div>
+    <div class="pillars">
+      <div><b>FEEL</b><span>Arousal and valence</span></div>
+      <div><b>THINK</b><span>Cognitive load</span></div>
+    </div>
+    <a class="cta" href="#feel">Explore the prototype <span aria-hidden="true">â†’</span></a>
+    <p class="small hero-note">Independent concept by Navyaa Sambhar. Not affiliated with Temple. Built on public fNIRS research data, no Temple data.</p>
+  </div>
+  <div class="hero-phone">
+    <div class="phone" data-phone="today"></div>
+    <p class="label quiet concept">Concept screen. Illustrative values.</p>
+  </div>
+</section>
+
+<!-- 2. THE MIND TAB -->
+<section id="mind" aria-label="The Mind tab">
+  <div class="chapters">
+    <article class="chap" id="feel" data-tab="feel">
+      <h2 class="mega">Feel</h2>
+      <p class="lede">Understand how intensely your mind is responding, and in which direction.</p>
+      <div class="defs">
+        <div><b>Arousal</b><span>How activated you are.</span></div>
+        <div><b>Valence</b><span>Whether the response is positive or negative.</span></div>
+      </div>
+      <div class="basis"><span class="label quiet">Research basis: REFED, NeurIPS 2025. 32 participants, 480 emotional trials.</span><a href="#evidence">See it on real data â†“</a></div>
+      <div class="inline-phone"><div class="phone" data-phone="feel"></div></div>
+    </article>
+    <article class="chap" id="think" data-tab="think">
+      <h2 class="mega">Think</h2>
+      <p class="lede">Understand when cognitive demand may be staying unusually high.</p>
+      <div class="defs">
+        <div><b>Load</b><span>How much your mind is carrying right now.</span></div>
+        <div><b>Duration</b><span>How long it has stayed high.</span></div>
+        <div><b>Action</b><span>A recovery window, suggested when load stays high.</span></div>
+      </div>
+      <div class="basis"><span class="label quiet">Research basis: Tufts fNIRS2MW. 68 participants, four workload levels.</span><a href="#ev-think">See it on real data â†“</a></div>
+      <div class="transfer" id="transfer">
+        <h3 class="label">Why this may transfer</h3>
+        <div class="tx-list">
+          <div><b>fNIRS</b><span>â†’ cerebral oxygenation / hemodynamic response</span></div>
+          <div><b>TCD</b><span>â†’ cerebral blood-flow velocity</span></div>
+          <div><b>Task</b><span>Same cognitive workload task</span></div>
+          <div><b>Levels</b><span>0-back / 1-back / 2-back</span></div>
+          <div><b>People</b><span>14 participants</span></div>
+        </div>
+        <div class="tx-chart" id="tx-chart" role="img" aria-label="Workload responses measured with fNIRS and TCD"></div>
+        <p class="tx-claim">Independent public data shows cognitive workload is accompanied by measurable changes in cerebral oxygenation and cerebral blood-flow velocity. Temple-specific validation is the next experiment.</p>
+        <p class="small" id="tx-note"></p>
+      </div>
+      <div class="inline-phone"><div class="phone" data-phone="think"></div></div>
+    </article>
+    <article class="chap" id="moments" data-tab="moments">
+      <h2 class="mega">Moments</h2>
+      <p class="lede">Your physiology notices the moment. You say what it was.</p>
+      <div class="defs">
+        <div><b>Notice</b><span>WITHIN flags a strong response.</span></div>
+        <div><b>Label</b><span>One tap: stressed, focused, excited.</span></div>
+        <div><b>Learn</b><span>Each label teaches it what your physiology means.</span></div>
+      </div>
+      <div class="basis"><span class="label quiet">Try it: tap 13:14 on the phone.</span></div>
+      <div class="inline-phone"><div class="phone" data-phone="moments"></div></div>
+    </article>
+  </div>
+  <div class="stickcol">
+    <div class="stickphone">
+      <div class="phone" id="main-phone" data-phone="feel think moments"></div>
+      <p class="label quiet concept">Concept screens. Illustrative values.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. THE PRODUCT IN ONE SENTENCE -->
+<section id="layers">
+  <h2 class="h2 in">WITHIN turns Templeâ€™s cerebral signal into three layers: state, context and personalization.</h2>
+  <div class="stack">
+    <div class="layer in"><span class="k">Layer 1</span><b>State</b><span>Feel and Think: what your mind is doing now.</span><span class="arrow" aria-hidden="true">â†’</span></div>
+    <div class="layer in"><span class="k">Layer 2</span><b>Context</b><span>Moments: what was actually happening.</span><span class="arrow" aria-hidden="true">â†’</span></div>
+    <div class="layer in"><span class="k">Layer 3</span><b>Personalization</b><span>Your model: what your physiology means.</span></div>
+  </div>
+</section>
+
+<!-- 4. THE LEARNING LOOP -->
+<section id="loop">
+  <h2 class="h2">It learns what <br>your physiology means.</h2>
+  <p class="lede" style="margin-top:1.6rem">Everyoneâ€™s responses look different. Your labels turn a population model into yours.</p>
+  <div class="steps" id="steps"></div>
+  <p class="small" style="margin-top:4rem">Illustration of the idea. The experiment below measures it on public data.</p>
+  <div class="pz" id="pz">
+    <h3 class="label" style="margin-top:6rem">Does personal data help? Measured, not assumed.</h3>
+    <p class="lede" style="margin-top:1rem; max-width:44ch">For each held-out person, the model gets <i>k</i> of their own labelled videos or task blocks, then is tested on a fixed set of their other ones.</p>
+    <div id="pz-chart"></div>
+    <p class="small" id="pz-note"></p>
+  </div>
+</section>
+
+<!-- 5. EVIDENCE -->
+<section id="evidence" aria-labelledby="ev-title">
+  <div class="ev-head">
+    <h2 class="h2" id="ev-title">Tested on public brain data.</h2>
+    <p class="lede">fNIRS measures cortical oxygenation changes; Templeâ€™s Flow estimates cerebral blood-flow dynamics. Different signals, related physiology.</p>
+  </div>
+
+  <div class="ev" id="ev-feel">
+    <div class="ev-bar">
+      <div class="ids"><span class="label" style="color:var(--ink)">Feel</span><span class="label live" id="live-tag">Live replay</span><span class="label" id="subject-tag">Subject 07</span><span class="label quiet" id="source-tag">Public fNIRS recording</span></div>
+      <div class="controls"><span class="time num" id="r-time">00:00 / 00:00</span><button class="ghost" id="r-restart">Restart</button><button class="ghost" id="r-play" aria-pressed="false">Play</button></div>
+    </div>
+    <div class="trace-wrap">
+      <canvas id="r-canvas" aria-label="Hemodynamic signal replay"></canvas>
+      <div class="legend label"><span style="--c:var(--oxy)">HbO</span><span style="--c:var(--deoxy)">HbR</span><span style="--c:var(--ink)">HbT</span></div>
+      <div class="scrub"><label class="sr" for="r-scrub">Replay position</label><input id="r-scrub" type="range" min="0" max="1000" value="0"></div>
+    </div>
+    <div class="ev-body">
+      <div class="read">
+        <div><span class="label">Arousal</span> <span class="label quiet" id="a-wait"></span><div class="v num" id="a-val">0.50</div><div class="c" id="a-cat">â€”</div></div>
+        <div><span class="label">Valence</span><div class="v num" id="v-val">+0.00</div><div class="c" id="v-cat">â€”</div></div>
+      </div>
+      <svg class="plane" id="plane" viewBox="0 0 600 600" role="img" aria-label="Affect plane: valence across, arousal up">
+        <rect x="248" y="40" width="104" height="520" fill="var(--paper-2)" opacity=".6"/>
+        <rect x="40" y="248" width="520" height="104" fill="var(--paper-2)" opacity=".6"/>
+        <line x1="300" y1="40" x2="300" y2="560" stroke="var(--rule-strong)"/><line x1="40" y1="300" x2="560" y2="300" stroke="var(--rule-strong)"/>
+        <text x="300" y="24" text-anchor="middle">ACTIVATED</text><text x="300" y="590" text-anchor="middle">CALM</text>
+        <text x="40" y="286" text-anchor="start">UNPLEASANT</text><text x="560" y="286" text-anchor="end">PLEASANT</text>
+        <polyline id="p-report" fill="none" stroke="var(--deoxy)" stroke-width="1.6" stroke-dasharray="3 5" opacity="0"/>
+        <circle id="p-report-dot" r="8" fill="none" stroke="var(--deoxy)" stroke-width="1.6" opacity="0"/>
+        <polyline id="p-trail" fill="none" stroke="var(--ink)" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/>
+        <circle id="p-halo" class="halo" r="11" fill="var(--oxy)"/><circle id="p-dot" r="8" fill="var(--oxy)"/>
+      </svg>
+      <div class="rv">
+        <span class="label">Model estimate, whole recording</span>
+        <div style="margin-top:1rem"><div class="rv-line"><span>Arousal</span><span id="m-a">â€”</span></div><div class="rv-line"><span>Valence</span><span id="m-v">â€”</span></div></div>
+        <p class="small" id="m-note" style="margin-top:1rem"></p>
+        <button class="cta" id="rv-btn" style="margin-top:.6rem">Reveal self-report <span aria-hidden="true">â†’</span></button>
+        <div class="rv-report" id="rv-report" aria-live="polite">
+          <span class="label">Participant reported</span>
+          <div class="rv-line" style="margin-top:1rem"><span>Arousal</span><span id="s-a">â€”</span></div><div class="rv-line"><span>Valence</span><span id="s-v">â€”</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" id="verdict" aria-live="polite"></div>
+    <div class="source label" id="source"></div>
+  </div>
+
+  <div class="ev" id="ev-think">
+    <div class="ev-bar">
+      <div class="ids"><span class="label" style="color:var(--ink)">Think</span><span class="label live" id="t-live">Replay</span><span class="label quiet">Tufts fNIRS2MW, n-back tasks</span></div>
+      <div class="controls"><button class="ghost" id="t-play" aria-pressed="false">Play</button></div>
+    </div>
+    <div class="trace-wrap" style="height:22vh; min-height:150px"><canvas id="load-canvas" aria-hidden="true"></canvas>
+      <div class="legend label"><span style="--c:var(--oxy)">HbO</span><span style="--c:var(--deoxy)">HbR</span></div></div>
+    <div class="think-ev">
+      <div><span class="label">Cognitive load</span><div class="l-num num" id="l-num">0</div><div class="l-cat" id="l-cat">LOW</div></div>
+      <div>
+        <div class="task" id="task"><span>0-back</span><span>1-back</span><span>2-back</span><span>3-back</span></div>
+        <div class="cont" aria-hidden="true"><div class="track"></div><div class="dot" id="l-dot" style="left:0%"></div><div class="ends"><span class="label quiet">Rested</span><span class="label quiet">Overloaded</span></div></div>
+        <p class="small" id="t-note" style="margin-top:2.6rem">Normalised display of model output, 0 to 100. Not a clinical measure.</p>
+      </div>
+    </div>
+    <p class="small ev-foot" id="t-metrics"></p>
+  </div>
+
+  <div class="research-cta">
+    <p class="small" style="margin:0">Datasets, evaluation protocol, benchmarks and limitations.</p>
+    <button class="cta" id="open-research">Research <span aria-hidden="true">â†’</span></button>
+  </div>
+</section>
+
+<!-- 6. ENDING -->
+<section id="final" aria-labelledby="fin-title">
+  <h2 class="h2 in" id="fin-title">Public data says <br>itâ€™s worth testing.</h2>
+  <p class="lede in">fNIRS isnâ€™t Flow. A real Temple signal is the next experiment.</p>
+  <div class="fin2" id="fin2">
+    <p class="h2">I just need<br>a Temple.</p>
+    <div class="fin-foot">
+      <span class="label">Built by Navyaa Sambhar</span>
+      <span class="links">
+        <a class="cta" id="link-live" href="#evidence">View live experiment <span aria-hidden="true">â†’</span></a>
+        <a class="cta" id="link-gh" href="#" rel="noopener">GitHub <span aria-hidden="true">â†’</span></a>
+      </span>
+    </div>
+  </div>
+</section>
+</main>
+<footer><span class="small">Independent concept. Not affiliated with or endorsed by Temple. No Temple data. Not a medical device.</span><span class="small">REFED (CC BY-NC-SA 4.0). Tufts fNIRS2MW (CC BY 4.0). PhysioNet mental-fnirs v1.0, doi:10.13026/zfb2-1g43.</span></footer>
+
+<!-- RESEARCH -->
+<dialog class="research" id="research" aria-labelledby="rs-title">
+  <button class="ghost rs-close" id="rs-close">Close</button>
+  <div class="rs-in">
+    <h2 class="h2" id="rs-title">Research</h2>
+    <p class="lede" style="margin-top:1.4rem; max-width:44ch" id="about-mode"></p>
+    <div class="rs-sec">
+      <h3 class="label">Feel: REFED, NeurIPS 2025</h3>
+      <div class="figs">
+        <div class="fig"><b class="num" id="n-sub">32</b><span class="label">People</span></div>
+        <div class="fig"><b class="num" id="n-rec">480</b><span class="label">Emotional experiences</span></div>
+        <div class="fig"><b class="num"><span id="n-fs">47.62</span><small>Hz</small></b><span class="label">fNIRS sampling</span></div>
+        <div class="fig"><b class="num" id="n-sig">6</b><span class="label">Hemodynamic / optical signals</span></div>
+      </div>
+      <p class="small" id="n-src" style="margin-top:1.8rem"></p>
+    </div>
+    <div class="rs-sec bench">
+      <div><h3 class="label">Published REFED benchmark</h3><p class="small" style="margin-top:1rem">fNIRS only. Three classes (low / medium / high). Within-subject, leave-one-trial-out. Ning et al., NeurIPS 2025, Table 6.</p></div>
+      <div>
+        <div class="bench-row"><span class="model">MDNet</span><div><b class="num">60.53<small>%</small></b><span class="label">Valence accuracy</span></div><div><b class="num">66.47<small>%</small></b><span class="label">Arousal accuracy</span></div></div>
+        <div class="bench-row"><span class="model">SVM</span><div><b class="num">57.30<small>%</small></b><span class="label">Valence</span></div><div><b class="num">64.28<small>%</small></b><span class="label">Arousal</span></div></div>
+      </div>
+      <div><h3 class="label">This project</h3><p class="small" style="margin-top:1rem" id="ours-proto">Subject-independent: no participant appears in both training and test.</p></div>
+      <div id="ours"></div>
+    </div>
+    <div class="rs-sec">
+      <h3 class="label">Think: Tufts fNIRS2MW, NeurIPS 2021</h3>
+      <p class="small" style="margin-top:1rem" id="t-meta">68 participants. Forehead fNIRS at 5.2 Hz. 0- to 3-back. Official 30-second windows and subject buckets.</p>
+      <p class="small" id="t-metrics2"></p>
+    </div>
+    <div class="rs-sec">
+      <h3 class="label">Temple relevance: PhysioNet fNIRS + TCD (Mukli, Yabluchanskiy &amp; Csipo, 2021)</h3>
+      <div class="cols" id="pn-detail"></div>
+    </div>
+    <div class="rs-sec">
+      <h3 class="label">Method and limits</h3>
+      <div class="cols">
+        <div><h4 class="label quiet">Evaluation</h4><p>Every split is grouped by participant: nobody appears in both training and test. Headline numbers are balanced accuracy and macro-F1, because labels are imbalanced; raw accuracy and chance (always guessing the most common class) are shown alongside.</p><p>Every REFED participant watched the same 15 videos, so a second test holds out people and videos together. If the model had learned the videos rather than the response, this number drops.</p><p>Each person's signals are scaled using their own unlabelled recordings. In a product, that means a short calibration period before readings appear.</p><p>Replays use out-of-fold predictions for a held-out participant chosen before looking at the outcome. The reveal shows whatever happened.</p></div>
+        <div><h4 class="label quiet">Limits</h4><p>fNIRS is not Flow: different sensor, placement and signal. Nothing here shows WITHIN would work on Temple hardware; it shows the question is worth asking.</p><p>Physiological states do not uniquely determine emotions. Arousal and valence are dimensions, not diagnoses.</p></div>
+        <div><h4 class="label quiet">Concept screens</h4><p>The phone screens, Flow values, durations, recovery suggestions and moments are illustrative product design, not measurements. Templeâ€™s real app may look different.</p></div>
+      </div>
+    </div>
+  </div>
+</dialog>
+<script>
+/* Real demo data is injected here by pipeline/export_demo.py. null = preview mode. */
+window.WITHIN_DATA = null;
+</script>
+<script>
+(() => {
+'use strict';
+/* Links for the final screen. Leave github empty to hide that button. */
+const LINKS = { live: 'https://claude.ai/artifact/2MQhrMvzzmQ8iyECUbcdj3', github: 'https://github.com/navyaa14/WITHIN-An-Intelligence-Layer-for-Temple' };   // set github to your repo URL to show that button
+
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const MINUS = '\u2212';
+const signed = (v, d = 2) => (v >= 0 ? '+' : MINUS) + Math.abs(v).toFixed(d);
+const pad2 = n => String(n).padStart(2, '0');
+const mmss = s => pad2(Math.floor(s / 60)) + ':' + pad2(Math.floor(s % 60));
+function tokens(el = document.documentElement) {
+  const cs = getComputedStyle(el), g = n => cs.getPropertyValue(n).trim();
+  return { ink: g('--ink'), oxy: g('--oxy'), deoxy: g('--deoxy'), dink: g('--dev-ink'), doxy: g('--dev-oxy'), ddeoxy: g('--dev-deoxy') };
+}
+let C = tokens();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { C = tokens(); });
+function fit(c) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h); return [x, w, h];
+}
+function stroke(x, pts, color, width, alpha = 1, dash) {
+  if (pts.length < 2) return;
+  x.save(); x.globalAlpha = alpha; x.strokeStyle = color; x.lineWidth = width; x.lineJoin = 'round'; x.lineCap = 'round'; if (dash) x.setLineDash(dash);
+  x.beginPath(); x.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length - 1; i++) x.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+  const l = pts[pts.length - 1]; x.lineTo(l[0], l[1]); x.stroke(); x.restore();
+}
+function loop(el, fn) {
+  let vis = false, id = 0;
+  const tick = t => { id = 0; if (!vis) return; fn(t / 1000); if (!RM) id = requestAnimationFrame(tick); };
+  new IntersectionObserver(([e]) => { vis = e.isIntersecting; if (vis && !id) id = requestAnimationFrame(tick); }, { rootMargin: '120px' }).observe(el);
+}
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function wave(seed, n = 5, fmin = .02, fmax = .14) {
+  const r = rng(seed), c = Array.from({ length: n }, (_, i) => ({ f: fmin + r() * (fmax - fmin), p: r() * 6.283, a: 1 / (1 + i * .7) }));
+  const norm = c.reduce((s, k) => s + k.a, 0);
+  return t => c.reduce((s, k) => s + k.a * Math.sin(6.283 * k.f * t + k.p), 0) / norm;
+}
+const zs = a => { const m = a.reduce((s, v) => s + v, 0) / a.length, sd = Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / a.length) || 1; return a.map(v => (v - m) / sd); };
+const go = id => { const t = $('#' + id); if (t) scrollTo({ top: t.getBoundingClientRect().top + scrollY - 64, behavior: RM ? 'auto' : 'smooth' }); };
+
+/* ---------- data ---------- */
+function makePreview() {
+  const dur = 120, fs = 4, N = dur * fs, w1 = wave(7, 6, .01, .09), w2 = wave(11, 4, .08, .3), w3 = wave(19, 5, .01, .07);
+  const hbo = [], hbr = [], hbt = [];
+  for (let i = 0; i < N; i++) { const t = i / fs, o = w1(t) * 1.4 + w2(t) * .25, r = -.45 * w1(t - 2) + .3 * w3(t); hbo.push(o); hbr.push(r); hbt.push(o + r); }
+  const wa = wave(23, 3, .008, .03), wv = wave(29, 3, .008, .03), pt = [], pa = [], pv = [];
+  for (let t = 5; t <= dur - 5; t += 2) { pt.push(t); pa.push(clamp(.55 + .32 * wa(t), 0, 1)); pv.push(clamp(.1 + .5 * wv(t), -1, 1)); }
+  const tf = 5.2, per = Math.round(30 * tf), to = [], tr = [], blocks = [], wo = wave(31, 6, .01, .08), wr = wave(37, 5, .01, .08);
+  for (let b = 0; b < 4; b++) blocks.push({ level: b, start: b * per, end: (b + 1) * per });
+  for (let i = 0; i < 4 * per; i++) { const t = i / tf; to.push(wo(t)); tr.push(-.5 * wo(t - 1.5) + .35 * wr(t)); }
+  return {
+    meta: { source: 'preview' },
+    refed: { stats: { subjects: 32, recordings: 480, fs: 47.62, signal_types: 6 },
+      replay: { subject: null, duration: dur, fs, hbo: zs(hbo), hbr: zs(hbr), hbt: zs(hbt), pred_t: pt, pred_arousal: pa, pred_valence: pv, report_t: null }, metrics: null },
+    tufts: { stats: { subjects: 68, fs: 5.2, levels: 4, window_s: 30 },
+      replay: { subject: null, fs: tf, hbo: zs(to), hbr: zs(tr), blocks, load_t: null, load: null }, metrics: null } };
+}
+const REAL = window.WITHIN_DATA || {};
+const SYN = !!(REAL.meta && REAL.meta.synthetic);
+const SIM = 'SIMULATED â€” NOT A RESEARCH RESULT';
+const PRE = makePreview();
+const modeOf = k => REAL[k] ? (SYN ? 'smoke' : 'real') : 'preview';
+const MODE_F = modeOf('refed'), MODE_T = modeOf('tufts');
+/* PhysioNet TCD built in: computed from the authors' Summary-statistics_MCA.csv (14 participants,
+   L/R-average MCA velocity, n-back vs preceding 0-back). pipeline/physionet_adapter.py reproduces it
+   and adds the fNIRS side from raw intensities. */
+const PN_BUILTIN = { source: 'summary', recruited: 14, n_nirs_recordings: 12, n_tcd_recordings: 12,
+  tcd: { one_back: { mean: 0.631, sem: 0.682, n: 14, n_positive: 8, p_wilcoxon_greater: 0.2915 },
+         two_back: { mean: 4.794, sem: 1.225, n: 14, n_positive: 13, p_wilcoxon_greater: 0.000122 } }, fnirs: null };
+const D = { refed: REAL.refed || PRE.refed, tufts: REAL.tufts || PRE.tufts, physionet: REAL.physionet || PN_BUILTIN };
+const A_CAT = ['LOW', 'MEDIUM', 'HIGH'], V_CAT = ['NEGATIVE', 'NEUTRAL', 'POSITIVE'];
+const cls = x01 => x01 < .4 ? 0 : x01 < .6 ? 1 : 2;
+const MODEL_NAME = { svm: 'SVM', xgb: 'XGBoost', cnn: '1D CNN', transformer: 'Temporal transformer' };
+
+/* ---------- nav ---------- */
+const nav = $('#nav');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
+const navLinks = $$('.nav ul a');
+const navIO = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
+}), { rootMargin: '-45% 0px -50% 0px' });
+['feel', 'think', 'moments', 'evidence'].forEach(id => navIO.observe($('#' + id)));
+const inIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('seen'); inIO.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+$$('.in').forEach(el => inIO.observe(el));
+
+/* ---------- hero flow lines ---------- */
+(function flow() {
+  const c = $('#flow'), N = 24;
+  loop(c, t => {
+    const [x, w, h] = fit(c), s = t * .16, base = h * (w < 980 ? .5 : .9), step = Math.max(6, h * .01);
+    for (let i = 0; i < N; i++) {
+      const k = i - N / 2, pts = [];
+      for (let px = -20; px <= w + 20; px += 14) {
+        const u = px / w;
+        pts.push([px, base + k * step * (.55 + .45 * Math.sin(u * 3.1 + s * .7)) + h * .05 * Math.sin(u * 4.2 + s + i * .045) + h * .025 * Math.sin(u * 9.5 - s * 1.3 + i * .12)]);
+      }
+      if (i === 9) stroke(x, pts, C.oxy, 1.5, .8); else if (i === 15) stroke(x, pts, C.deoxy, 1.3, .65); else stroke(x, pts, C.ink, .8, .04 + .08 * (1 - Math.abs(k) / (N / 2)));
+    }
+  });
+})();
+
+/* ---------- phones (concept screens, illustrative values) ---------- */
+const tabs = on => '<div class="p-sub" style="margin-top:6px">Mind</div><div class="tabs" role="tablist">' +
+  ['feel', 'think', 'moments'].map(t => '<button role="tab" aria-selected="' + (t === on) + '" class="' + (t === on ? 'on' : '') + '" data-goto="' + t + '">' + t.toUpperCase() + '</button>').join('') + '</div>';
+const MOMENTS = [
+  { t: '07:42', n: 'Morning walk', s: 'Arousal â†‘  Load â†“' },
+  { t: '10:36', n: 'Deep work', s: 'Arousal â†’  Load â†‘â†‘' },
+  { t: '13:14', n: 'Significant response', s: 'Arousal â†‘â†‘  Valence â†“', key: true },
+  { t: '18:42', n: 'Training', s: 'Arousal â†‘â†‘  Load â†’' },
+  { t: '22:16', n: 'Winding down', s: 'Arousal â†“  Load â†“' }];
+const SCREENS = {
+  today: () => `<div class="p-sub">Tuesday</div><div class="p-title">Today</div>
+    <div class="p-card" style="margin-top:14px"><div class="row"><span class="p-lab">Flow</span><span class="p-lab livedot">Live</span></div>
+      <div class="row" style="align-items:flex-end;margin-top:8px"><span class="p-big num">72</span><span style="font-size:11px;color:var(--dev-ink-2);text-align:right;line-height:1.35">â†‘ 4 vs your<br>7-day average</span></div>
+      <canvas class="p-trace" data-k="flow"></canvas></div>
+    <div class="p-card" style="margin-top:10px"><span class="p-lab">This week</span>
+      <div style="display:flex;gap:7px;align-items:flex-end;height:44px;margin-top:10px">${[62, 66, 64, 70, 68, 71, 72].map((v, i) => `<i style="flex:1;height:${(v - 52) * 2.2}px;border-radius:3px;background:${i === 6 ? 'var(--dev-oxy)' : 'var(--dev-rule)'}"></i>`).join('')}</div></div>
+    <div class="p-lab" style="margin:18px 0 8px">Proposed Â· WITHIN layer</div>
+    <button class="mind-row" data-goto="feel"><span><span style="font-size:16px;font-weight:500">Mind</span><span class="new">NEW</span><br><span style="font-size:11px;color:var(--dev-ink-2)">How your mind is responding</span></span><span aria-hidden="true" style="font-size:20px">â€º</span></button>`,
+  feel: () => `${tabs('feel')}
+    <div class="p-card"><div class="row"><span class="p-lab">Flow</span><span class="p-lab livedot">Live</span></div><canvas class="p-trace" data-k="feel"></canvas></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div class="p-card"><span class="p-lab">Arousal</span><div class="p-mid num" data-live="a" style="margin-top:10px">78</div><div class="p-cat">HIGH</div></div>
+      <div class="p-card"><span class="p-lab">Valence</span><div class="p-mid num" data-live="v" style="margin-top:10px">+61</div><div class="p-cat">POSITIVE</div></div></div>
+    <p style="font-size:13px;line-height:1.4;margin:14px 2px 0"><b style="font-weight:600">Activated and positive.</b> <span style="color:var(--dev-ink-2)">Often associated with excitement, engagement or anticipation.</span></p>
+    <svg viewBox="0 0 200 120" style="width:100%;margin-top:14px" aria-hidden="true">
+      <line x1="100" y1="8" x2="100" y2="112" stroke="var(--dev-rule)"/><line x1="20" y1="60" x2="180" y2="60" stroke="var(--dev-rule)"/>
+      <text x="100" y="6" text-anchor="middle" font-size="6.5" letter-spacing="1" fill="var(--dev-ink-3)">ACTIVATED</text>
+      <text x="100" y="119" text-anchor="middle" font-size="6.5" letter-spacing="1" fill="var(--dev-ink-3)">CALM</text>
+      <text x="20" y="56" font-size="6.5" letter-spacing="1" fill="var(--dev-ink-3)">NEGATIVE</text>
+      <text x="180" y="56" text-anchor="end" font-size="6.5" letter-spacing="1" fill="var(--dev-ink-3)">POSITIVE</text>
+      <path d="M92 74 Q110 60 118 44 T140 30" fill="none" stroke="var(--dev-ink-3)" stroke-width="1"/>
+      <circle cx="140" cy="30" r="9" fill="var(--dev-oxy)" opacity=".2"/><circle cx="140" cy="30" r="4.5" fill="var(--dev-oxy)"/>
+    </svg>
+    <details class="why"><summary>Why am I seeing this? â€º</summary><ul><li>Your Flow pattern over the last minutes</li><li>The shape of the hemodynamic response</li><li>Compared with your personal baseline</li></ul></details>`,
+  think: () => `${tabs('think')}
+    <span class="p-lab">Cognitive load</span>
+    <div class="row" style="align-items:flex-end"><span class="p-big num" data-live="l" style="font-size:72px">72</span><span class="p-cat" style="margin-bottom:10px">HIGH</span></div>
+    <div class="p-cont"><i></i><b style="left:72%"></b></div>
+    <div class="row" style="font-size:9px;letter-spacing:.14em;color:var(--dev-ink-3)"><span>RESTED</span><span>OVERLOADED</span></div>
+    <div class="p-rule"></div>
+    <div class="row" style="font-size:13px"><span style="color:var(--dev-ink-2)">Elevated for</span><span class="num">46 min</span></div>
+    <div class="p-rule"></div>
+    <div class="row" style="font-size:12px;color:var(--dev-ink-2)"><span>Flow</span><span style="color:var(--dev-ink)">â†‘</span></div>
+    <div class="row" style="font-size:12px;color:var(--dev-ink-2);margin-top:6px"><span>Cognitive demand</span><span style="color:var(--dev-ink)">â†‘</span></div>
+    <div class="rec"><span class="p-lab">Recovery recommended</span><p>Your load has stayed high. Consider a 10â€“15 minute recovery window.</p><button>START RECOVERY</button></div>`,
+  moments: () => `${tabs('moments')}
+    <span class="p-lab" style="margin-bottom:4px">Today</span>
+    <ul class="mo-list">${MOMENTS.map(m => `<li class="${m.key ? 'key' : ''}">${m.key ? '<button class="mo-key" aria-haspopup="true">' : ''}<span class="t num">${m.t}</span><span class="n">${m.n}<br><span class="s">${m.s}</span></span><span aria-hidden="true" style="color:${m.key ? 'var(--dev-oxy)' : 'var(--dev-ink-3)'}">â—</span>${m.key ? '</button>' : ''}</li>`).join('')}</ul>
+    <div class="sheet" role="dialog" aria-label="Label 13:14"><span class="p-lab">13:14 Â· Your physiology changed</span>
+      <div style="font-size:15px;margin-top:6px">High arousal. Negative valence.</div>
+      <div style="font-size:12px;color:var(--dev-ink-2);margin-top:12px">What was happening?</div>
+      <div class="chips">${['Stressed', 'Excited', 'Angry', 'Focused', 'Anxious', 'Other'].map(c => `<button>${c.toUpperCase()}</button>`).join('')}</div>
+      <div class="saved" aria-live="polite"></div></div>`
+};
+function buildPhone(el) {
+  const list = el.dataset.phone.split(' ');
+  el.innerHTML = '<div class="scr"><div class="sb"><span>9:41</span><span>â—â—â—</span></div>' +
+    list.map((s, i) => '<div class="screen' + (i === 0 ? ' on' : '') + '" data-s="' + s + '">' + SCREENS[s]() + '</div>').join('') + '</div>';
+  $$('[data-goto]', el).forEach(b => b.addEventListener('click', () => go(b.dataset.goto)));
+  $$('.p-trace', el).forEach((c, j) => {
+    const k = c.dataset.k, w1 = wave(k === 'flow' ? 5 : 8, 5, .05, .25), w2 = wave(13 + j, 4, .3, .7);
+    loop(c, t => { const [x, w, h] = fit(c), pts = []; for (let px = 0; px <= w; px += 3) { const u = t * .45 + px / w * 7; pts.push([px, h / 2 - (.55 * w1(u) + .12 * w2(u * 2)) * h * .8]); } stroke(x, pts, C.doxy, 1.7, 1); });
+  });
+  const key = $('.mo-key', el), sheet = $('.sheet', el);
+  if (key) {
+    key.addEventListener('click', () => sheet.classList.add('on'));
+    $$('.chips button', el).forEach(b => b.addEventListener('click', () => {
+      $$('.chips button', el).forEach(x => x.classList.toggle('on', x === b));
+      $('.saved', el).textContent = 'Saved as ' + b.textContent.toLowerCase() + '. WITHIN will use this to learn what this pattern means for you.';
+      $('.mo-list li.key .s', el).textContent = 'Labelled: ' + b.textContent.toLowerCase();
+      setTimeout(() => sheet.classList.remove('on'), RM ? 1200 : 2600);
+    }));
+  }
+  return el;
+}
+$$('[data-phone]').forEach(buildPhone);
+/* gentle live values on the concept screens */
+const jit = wave(91, 3, .05, .15);
+if (!RM) setInterval(() => {
+  const t = performance.now() / 1000;
+  $$('[data-live="a"]').forEach(e => e.textContent = Math.round(78 + 2 * jit(t)));
+  $$('[data-live="v"]').forEach(e => e.textContent = '+' + Math.round(61 + 2 * jit(t + 9)));
+  $$('[data-live="l"]').forEach(e => e.textContent = Math.round(72 + 1.5 * jit(t + 4)));
+}, 1400);
+/* desktop: the sticky phone follows the chapter in view */
+const main = $('#main-phone');
+const chapIO = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) $$('.screen', main).forEach(s => s.classList.toggle('on', s.dataset.s === e.target.dataset.tab));
+}), { rootMargin: '-45% 0px -50% 0px' });
+$$('.chap').forEach(c => chapIO.observe(c));
+
+/* ---------- learning loop ---------- */
+(function steps() {
+  const r = rng(77), g = () => { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283 * v); };
+  const pop = Array.from({ length: 150 }, () => [100 + g() * 34, 100 + g() * 34]);
+  const centers = [[62, 52, 'oxy'], [118, 64, 'ink'], [140, 138, 'deoxy'], [74, 132, 'ink']];
+  const mine = Array.from({ length: 42 }, (_, i) => { const c = centers[i % 4]; return [c[0] + g() * 11, c[1] + g() * 11, c[2]]; });
+  const axes = '<line x1="100" y1="8" x2="100" y2="192" stroke="var(--rule)"/><line x1="8" y1="100" x2="192" y2="100" stroke="var(--rule)"/>';
+  const dots = (a, op) => a.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="var(--${p[2]})" opacity="${op}"/>`).join('');
+  const cloud = op => pop.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="1.4" fill="var(--ink-3)" opacity="${op}"/>`).join('');
+  const regions = centers.map(c => `<ellipse cx="${c[0]}" cy="${c[1]}" rx="27" ry="23" fill="var(--${c[2]})" opacity=".1"/>`).join('');
+  const S = [
+    ['Day 1', 'Population model', cloud(.55), ''],
+    ['You label moments', '', cloud(.3) + dots(mine.slice(0, 6), .95), '<div class="tags"><span>Stressed</span><span>Focused</span><span>Excited</span></div>'],
+    ['Week 2', 'Your baseline', cloud(.15) + dots(mine.slice(0, 20), .9), ''],
+    ['Month 1: your model', 'Learns what your physiology means', regions + dots(mine, .75), '']];
+  $('#steps').innerHTML = S.map((s, i) => (i ? '<div class="st-arrow" aria-hidden="true">â†“</div>' : '') +
+    `<div class="st in${i === 3 ? ' final' : ''}"><svg viewBox="0 0 200 200" aria-hidden="true">${axes}${s[2]}</svg><div><b>${s[0]}</b>${s[1] ? `<span class="label">${s[1]}</span>` : ''}${s[3]}</div></div>`).join('');
+  $$('#steps .in').forEach(el => inIO.observe(el));
+})();
+
+/* ---------- evidence: FEEL replay ---------- */
+const R = D.refed.replay;
+const PX = v => 40 + (v + 1) / 2 * 520, PY = a => 560 - a * 520;
+(function feelReplay() {
+  const c = $('#r-canvas'), scrub = $('#r-scrub'), btn = $('#r-play'), SPEED = 4, dur = R.duration;
+  let rt = 0, playing = false, prev = 0, raf = 0, started = false;
+  const all = R.hbo.concat(R.hbr, R.hbt), lo = Math.min(...all), hi = Math.max(...all);
+  const live = $('#live-tag'), subj = $('#subject-tag'), src = $('#source-tag');
+  if (MODE_F === 'real') subj.textContent = 'Subject ' + pad2(R.subject) + ', held out';
+  else if (MODE_F === 'smoke') { live.outerHTML = '<span class="sim">' + SIM + '</span>'; subj.textContent = 'Pipeline smoke test on random arrays'; src.textContent = ''; }
+  else { live.outerHTML = '<span class="sim">' + SIM + '</span>'; subj.textContent = 'Preview signal'; src.textContent = 'A real held-out REFED recording replaces it after the pipeline runs'; }
+  function at(ts, vs, t) {
+    if (!ts || !ts.length || t < ts[0]) return null;
+    if (t >= ts[ts.length - 1]) return vs[vs.length - 1];
+    let a = 0, b = ts.length - 1; while (b - a > 1) { const m = (a + b) >> 1; ts[m] <= t ? a = m : b = m; }
+    return lerp(vs[a], vs[b], (t - ts[a]) / (ts[b] - ts[a]));
+  }
+  function draw() {
+    const [x, w, h] = fit(c), padL = clamp(w * .04, 20, 64), top = 48, bot = 34;
+    const X = i => padL + i / (R.hbo.length - 1) * (w - 2 * padL), Y = v => top + (1 - (v - lo) / (hi - lo)) * (h - top - bot);
+    const ser = [[R.hbt, C.ink, 1], [R.hbr, C.deoxy, 1.6], [R.hbo, C.oxy, 1.8]].map(([a, col, lw]) => [a.map((v, i) => [X(i), Y(v)]), col, lw]);
+    ser.forEach(([p, col, lw]) => stroke(x, p, col, lw, .14));
+    const ph = X(rt * R.fs);
+    x.save(); x.beginPath(); x.rect(0, 0, ph, h); x.clip(); ser.forEach(([p, col, lw]) => stroke(x, p, col, lw, 1)); x.restore();
+    x.save(); x.strokeStyle = C.ink; x.globalAlpha = .5; x.beginPath(); x.moveTo(ph, top - 12); x.lineTo(ph, h - bot + 4); x.stroke(); x.restore();
+  }
+  const cache = {}, set = (id, v, p = 'textContent') => { if (cache[id + p] !== v) { cache[id + p] = v; $('#' + id)[p] = v; } };
+  function ui() {
+    set('r-time', mmss(rt) + ' / ' + mmss(dur)); scrub.value = Math.round(rt / dur * 1000);
+    const a = at(R.pred_t, R.pred_arousal, rt), v = at(R.pred_t, R.pred_valence, rt), waiting = a == null;
+    const A = waiting ? .5 : a, V = waiting ? 0 : v;
+    set('a-wait', waiting ? 'waiting for first 10 s' : '');
+    set('a-val', A.toFixed(2)); set('v-val', signed(V));
+    set('a-cat', waiting ? 'â€”' : A_CAT[cls(A)]); set('v-cat', waiting ? 'â€”' : V_CAT[cls((V + 1) / 2)]);
+    const pts = [];
+    for (let i = 0; i < R.pred_t.length && R.pred_t[i] <= rt; i++) pts.push(PX(R.pred_valence[i]).toFixed(1) + ',' + PY(R.pred_arousal[i]).toFixed(1));
+    if (!waiting) pts.push(PX(V).toFixed(1) + ',' + PY(A).toFixed(1));
+    $('#p-trail').setAttribute('points', pts.join(' '));
+    ['p-dot', 'p-halo'].forEach(id => { const e = $('#' + id); e.setAttribute('cx', PX(V)); e.setAttribute('cy', PY(A)); e.style.opacity = waiting ? .2 : 1; });
+  }
+  function frame(t) {
+    raf = 0; const dt = prev ? Math.min(.1, (t - prev) / 1000) : 0; prev = t;
+    if (playing) { rt += dt * SPEED; if (rt >= dur) { rt = dur; pause(); btn.textContent = 'Replay'; } }
+    draw(); ui(); if (playing) raf = requestAnimationFrame(frame);
+  }
+  function play() { if (rt >= dur) rt = 0; playing = true; started = true; prev = 0; btn.textContent = 'Pause'; btn.setAttribute('aria-pressed', 'true'); if (!raf) raf = requestAnimationFrame(frame); }
+  function pause() { playing = false; btn.textContent = 'Play'; btn.setAttribute('aria-pressed', 'false'); }
+  btn.addEventListener('click', () => playing ? pause() : play());
+  $('#r-restart').addEventListener('click', () => { rt = 0; play(); });
+  scrub.addEventListener('input', () => { rt = scrub.value / 1000 * dur; started = true; if (!raf) raf = requestAnimationFrame(frame); });
+  new ResizeObserver(() => { if (!raf) raf = requestAnimationFrame(frame); }).observe(c);
+  new IntersectionObserver(([e]) => { if (e.isIntersecting && !started && !RM) play(); }, { threshold: .5 }).observe($('#ev-feel .trace-wrap'));
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- reveal ---------- */
+(function reveal() {
+  const btn = $('#rv-btn'), note = $('#m-note');
+  if (MODE_F === 'preview') {
+    btn.disabled = true;
+    note.textContent = 'Preview: no model has run on this synthetic signal, so there is nothing to reveal yet. The pipeline replaces it with a real held-out participant.';
+    return;
+  }
+  const mc = R.model_class, rc = R.report_class, m = D.refed.metrics || {};
+  $('#m-a').textContent = A_CAT[mc.arousal]; $('#m-v').textContent = V_CAT[mc.valence];
+  note.textContent = (MODEL_NAME[m.demo_model] || m.demo_model) + ', trained without this participant.' + (MODE_F === 'smoke' ? ' Smoke test on random data.' : '');
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    $('#s-a').textContent = A_CAT[rc.arousal]; $('#s-v').textContent = V_CAT[rc.valence];
+    $('#rv-report').classList.add('on');
+    const okA = mc.arousal === rc.arousal, okV = mc.valence === rc.valence, n = okA + okV, v = $('#verdict');
+    v.textContent = n === 2 ? 'Match' : n === 1 ? 'Partial match' : 'Mismatch'; v.classList.add('on');
+    const s = $('#source');
+    s.innerHTML = '<span style="display:block;margin-bottom:.8rem;text-transform:none;letter-spacing:0;font-size:.95rem;font-weight:400;color:var(--ink-2)">Arousal ' + (okA ? 'agrees' : 'differs') + '. Valence ' + (okV ? 'agrees' : 'differs') + '. Dashed line on the plane: what the participant reported, second by second.</span>' +
+      (MODE_F === 'smoke' ? SIM : 'Real data â€” REFED, NeurIPS 2025');
+    s.classList.add('on');
+    const step = Math.max(1, Math.floor(R.report_t.length / 200)), pts = [];
+    for (let i = 0; i < R.report_t.length; i += step) pts.push(PX(R.report_valence[i]).toFixed(1) + ',' + PY(R.report_arousal[i]).toFixed(1));
+    const pl = $('#p-report'); pl.setAttribute('points', pts.join(' ')); pl.style.transition = 'opacity 1.2s'; pl.setAttribute('opacity', '.9');
+    const mean = a => a.reduce((s, x) => s + x, 0) / a.length, d = $('#p-report-dot');
+    d.setAttribute('cx', PX(mean(R.report_valence))); d.setAttribute('cy', PY(mean(R.report_arousal))); d.setAttribute('opacity', '1');
+  });
+})();
+
+/* ---------- evidence: THINK replay ---------- */
+(function think() {
+  const T = D.tufts.replay, c = $('#load-canvas'), btn = $('#t-play');
+  const N = T.blocks[T.blocks.length - 1].end, fs = T.fs, SPEED = MODE_T === 'preview' ? 3 : 8, LV = ['LOW', 'MODERATE', 'HIGH', 'VERY HIGH'], chips = $$('#task span');
+  let s = 0, disp = 0, playing = false, prev = 0, raf = 0, started = false, last = {};
+  const pct1 = v => (v * 100).toFixed(1);
+  if (MODE_T === 'preview') {
+    $('#t-live').outerHTML = '<span class="sim">' + SIM + '</span>';
+    $('#t-note').textContent = 'Preview: the number follows the task condition on a synthetic signal, not a model. Model output (0 to 100, normalised, not a clinical measure) replaces it after the pipeline runs.';
+    $('#t-metrics').textContent = $('#t-metrics2').textContent = 'Cross-subject workload results are pending and appear only once the evaluation pipeline has produced them.';
+  } else {
+    if (MODE_T === 'smoke') $('#t-live').outerHTML = '<span class="sim">' + SIM + '</span>'; else $('#t-live').textContent = 'Participant ' + T.subject + ', held out';
+    const m = D.tufts.metrics, r = m.models[m.demo_model];
+    $('#t-metrics').textContent = $('#t-metrics2').textContent = (MODEL_NAME[m.demo_model] || m.demo_model) + ', four levels: ' + pct1(r.bacc) + '% balanced accuracy (Â±' + pct1(r.bacc_std) + '), macro-F1 ' + r.f1_macro.toFixed(2) + ', raw accuracy ' + pct1(r.acc) + '%. Chance: ' + pct1(r.chance_bacc ?? .25) + '% balanced, ' + pct1(r.chance_majority) + '% raw (majority class). ' + m.protocol + '.' + (MODE_T === 'smoke' ? ' Smoke test on random data, not a result.' : '');
+    const st = D.tufts.stats; $('#t-meta').textContent = st.subjects + ' participants. Forehead fNIRS at ' + st.fs + ' Hz. 0- to 3-back. ' + st.window_s + '-second windows.';
+  }
+  const blockAt = i => T.blocks.find(b => i >= b.start && i < b.end) || T.blocks[T.blocks.length - 1];
+  function target(i) {
+    if (T.load_t && T.load_t.length) {
+      if (i <= T.load_t[0]) return T.load[0];
+      let a = 0, b = T.load_t.length - 1; if (i >= T.load_t[b]) return T.load[b];
+      while (b - a > 1) { const m = (a + b) >> 1; T.load_t[m] <= i ? a = m : b = m; }
+      return lerp(T.load[a], T.load[b], (i - T.load_t[a]) / (T.load_t[b] - T.load_t[a]));
+    }
+    return blockAt(i).level / 3 * 100;
+  }
+  const all = T.hbo.concat(T.hbr), lo = Math.min(...all), hi = Math.max(...all);
+  function draw() {
+    const [x, w, h] = fit(c), win = (w < 700 ? 16 : 40) * fs, i0 = s - win * .75, i1 = i0 + win;
+    const X = i => (i - i0) / win * w, Y = v => h * .22 + (1 - (v - lo) / (hi - lo)) * h * .66, L = Math.min(T.hbo.length, N), st = Math.max(1, Math.round(win / 400)), o = [], r = [];
+    for (let i = Math.floor(i0); i <= Math.ceil(i1); i += st) { const k = ((i % L) + L) % L; o.push([X(i), Y(T.hbo[k])]); r.push([X(i), Y(T.hbr[k])]); }
+    stroke(x, r, C.deoxy, 1.6, .7); stroke(x, o, C.oxy, 1.8, .8);
+    x.save(); x.strokeStyle = C.ink; x.globalAlpha = .45; x.beginPath(); x.moveTo(X(s), 8); x.lineTo(X(s), h - 4); x.stroke(); x.restore();
+    T.blocks.flatMap(b => [b.start - N, b.start, b.start + N]).forEach(bs => { const bx = X(bs); if (bx > 0 && bx < w) { x.save(); x.strokeStyle = C.ink; x.globalAlpha = .14; x.beginPath(); x.moveTo(bx, 0); x.lineTo(bx, h); x.stroke(); x.restore(); } });
+  }
+  function ui(dt) {
+    const tg = target(s); disp = RM || !dt ? tg : lerp(disp, tg, 1 - Math.exp(-dt * 2.2));
+    const n = Math.round(disp), lvl = clamp(Math.round(disp / 100 * 3), 0, 3), b = blockAt(s);
+    if (last.n !== n) { $('#l-num').textContent = n; $('#l-dot').style.left = disp + '%'; last.n = n; }
+    if (last.lvl !== lvl) { $('#l-cat').textContent = LV[lvl]; last.lvl = lvl; }
+    if (last.b !== b.level) { chips.forEach((e, k) => e.classList.toggle('on', k === b.level)); last.b = b.level; }
+  }
+  function frame(t) {
+    raf = 0; const dt = prev ? Math.min(.1, (t - prev) / 1000) : 0; prev = t;
+    if (playing) { s += dt * fs * SPEED; if (s >= N) s = 0; }
+    draw(); ui(dt); if (playing) raf = requestAnimationFrame(frame);
+  }
+  function play() { playing = true; started = true; prev = 0; btn.textContent = 'Pause'; btn.setAttribute('aria-pressed', 'true'); if (!raf) raf = requestAnimationFrame(frame); }
+  function pause() { playing = false; btn.textContent = 'Play'; btn.setAttribute('aria-pressed', 'false'); }
+  btn.addEventListener('click', () => playing ? pause() : play());
+  new IntersectionObserver(([e]) => { if (e.isIntersecting && !started && !RM) play(); if (!e.isIntersecting && playing) pause(); }, { threshold: .35 }).observe($('#ev-think'));
+  new ResizeObserver(() => { if (!raf) raf = requestAnimationFrame(frame); }).observe(c);
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- research dialog ---------- */
+(function research() {
+  const dlg = $('#research'), st = D.refed.stats;
+  $('#open-research').addEventListener('click', () => dlg.showModal());
+  $('#rs-close').addEventListener('click', () => dlg.close());
+  $('#n-sub').textContent = st.subjects; $('#n-rec').textContent = st.recordings; $('#n-fs').textContent = Number(st.fs).toFixed(2); $('#n-sig').textContent = st.signal_types;
+  $('#n-src').textContent = MODE_F === 'preview' ? 'From the dataset documentation: 32 participants, 15 videos each. The pipeline recounts these from the files. Signals: HbO, HbR, HbT and 780, 805, 830 nm optical channels. EEG not used.'
+    : 'Counted from the dataset files by the pipeline. Signals: HbO, HbR, HbT and three optical channels. EEG not used.';
+  $('#about-mode').textContent = (MODE_F === 'real' ? 'Feel evidence: real out-of-fold results from the pipeline. ' : 'Feel evidence: ' + SIM.toLowerCase() + ' until the pipeline injects REFED results. ')
+    + (MODE_T === 'real' ? 'Think evidence: real Tufts results. ' : 'Think evidence: ' + SIM.toLowerCase() + ' until the pipeline injects Tufts results. ')
+    + 'PhysioNet TCD figures are real, computed from the datasetâ€™s published summary. Published REFED benchmark numbers are quoted from the paper.';
+  const box = $('#ours'), m = D.refed.metrics;
+  if (!m) { box.innerHTML = '<div class="bench-row" style="grid-template-columns:1fr"><p class="lede" style="color:var(--ink-3);max-width:40ch">Pending. Cross-subject results appear here only after the evaluation pipeline has produced them.</p></div>'; return; }
+  $('#ours-proto').textContent = m.protocol + '. Not directly comparable to the within-subject benchmark. Chance is the majority class of each test fold.' + (MODE_F === 'smoke' ? ' Smoke test on random data: not results.' : '');
+  const pct = v => (v * 100).toFixed(2);
+  const row = (name, tag, r) => '<div class="bench-row"><span class="model">' + name + (tag ? '<span class="label quiet" style="display:block;margin-top:.4rem">' + tag + '</span>' : '') + '</span>' +
+    ['valence', 'arousal'].map(d => '<div><b class="num">' + pct(r[d].bacc) + '<small>%</small></b><span class="label">' + d + ' balanced acc. Â±' + pct(r[d].bacc_std) + '</span><span class="label quiet" style="display:block;margin-top:.3rem">F1 ' + r[d].f1_macro.toFixed(2) + ', chance ' + pct(r[d].chance_bacc ?? 1 / 3) + '% Â· raw acc ' + pct(r[d].acc) + '% vs ' + pct(r[d].chance_majority) + '% majority</span></div>').join('') + '</div>';
+  box.innerHTML = Object.entries(m.models).map(([k, r]) => row(MODEL_NAME[k] || k, k === m.demo_model ? 'Used in replay' : '', r)).join('')
+    + (m.subject_video_holdout ? Object.entries(m.subject_video_holdout.models).map(([k, r]) => row(MODEL_NAME[k] || k, 'New people + new videos', r)).join('') : '');
+})();
+
+/* ---------- THINK: why this may transfer (PhysioNet fNIRS + TCD) ---------- */
+(function transfer() {
+  const P = D.physionet, real = !!P.fnirs, fx = real ? P.fnirs : null;
+  // fNIRS side: real if the adapter has run, otherwise clearly simulated placeholder bars
+  const fn = real ? [0, fx.one_back.mean, fx.two_back.mean] : null;
+  const fe = real ? [0, fx.one_back.sem, fx.two_back.sem] : null;
+  const tc = [0, P.tcd.one_back.mean, P.tcd.two_back.mean], te = [0, P.tcd.one_back.sem, P.tcd.two_back.sem];
+  const pending = (x0, title, unit) => {
+    const W = 250, top = 46, H = 170;
+    return `<text x="${x0}" y="14" font-size="12" font-weight="600" letter-spacing="1.6" style="fill:var(--ink-3)">${title}</text>
+      <text x="${x0}" y="31" font-size="10.5" style="fill:var(--ink-3)">${unit}</text>
+      <rect x="${x0 + 8}" y="${top}" width="${W - 8}" height="${H}" fill="url(#hatch)" stroke="var(--rule-strong)" stroke-dasharray="4 4"/>
+      <rect x="${x0 + 34}" y="${top + H / 2 - 30}" width="${W - 60}" height="60" fill="var(--paper)"/>
+      <text x="${x0 + W / 2 + 4}" y="${top + H / 2 - 6}" text-anchor="middle" font-size="10.5" font-weight="700" letter-spacing="1.3" style="fill:var(--ink)">PENDING REAL fNIRS PROCESSING</text>
+      <text x="${x0 + W / 2 + 4}" y="${top + H / 2 + 14}" text-anchor="middle" font-size="10">No values shown until physionet_adapter.py runs</text>`;
+  };
+  const panel = (x0, title, unit, v, e, col, sim, fmt, note) => {
+    const W = 250, H = 170, top = 46, base = top + H, lo = Math.min(0, ...v.map((m, i) => m - e[i])), hi = Math.max(...v.map((m, i) => m + e[i])) * 1.25 || 1;
+    const Y = y => top + (hi - y) / (hi - lo) * H, xs = [x0 + 40, x0 + 125, x0 + 210], z = Y(0);
+    let g = `<text x="${x0}" y="14" font-size="12" font-weight="600" letter-spacing="1.6" style="fill:var(--ink)">${title}</text>
+      <text x="${x0}" y="31" font-size="10.5">${unit}</text>
+      <line x1="${x0 + 8}" x2="${x0 + W}" y1="${z}" y2="${z}" stroke="var(--rule-strong)"/>`;
+    v.forEach((m, i) => {
+      const x = xs[i], lab = ['0-BACK', '1-BACK', '2-BACK'][i];
+      if (i === 0) g += `<line x1="${x - 20}" x2="${x + 20}" y1="${z}" y2="${z}" stroke="var(--ink)" stroke-width="2"/><text x="${x}" y="${z - 8}" font-size="10" text-anchor="middle">reference</text>`;
+      else {
+        const y = Y(m), h = Math.abs(z - y);
+        g += sim ? `<rect x="${x - 20}" y="${Math.min(y, z)}" width="40" height="${h}" fill="url(#hatch)" stroke="${col}" stroke-dasharray="3 3"/>`
+                 : `<rect x="${x - 20}" y="${Math.min(y, z)}" width="40" height="${h}" fill="${col}"/>`;
+        g += `<line x1="${x}" x2="${x}" y1="${Y(m + e[i])}" y2="${Y(m - e[i])}" stroke="var(--ink)" stroke-width="1"/>
+              <line x1="${x - 5}" x2="${x + 5}" y1="${Y(m + e[i])}" y2="${Y(m + e[i])}" stroke="var(--ink)"/>
+              <text x="${x}" y="${Y(m + e[i]) - 7}" font-size="11" text-anchor="middle" style="fill:var(--ink)">${fmt(m)}</text>`;
+      }
+      g += `<text x="${x}" y="${base + 22}" font-size="10" letter-spacing="1.2" text-anchor="middle">${lab}</text>`;
+    });
+    g += `<text x="${x0}" y="${base + 46}" font-size="10.5">${note}</text>`;
+    if (sim) g += `<g transform="translate(${x0 + W / 2} ${top + H / 2 - 6})"><rect x="-118" y="-13" width="236" height="26" fill="var(--paper)" stroke="var(--oxy)"/><text text-anchor="middle" y="4" font-size="9.5" font-weight="700" letter-spacing="1.1" style="fill:var(--oxy)">${SIM}</text></g>`;
+    return g;
+  };
+  const sgn = (v, d, u) => (v >= 0 ? '+' : '\u2212') + Math.abs(v).toFixed(d) + u;
+  const fNote = real ? `n = ${fx.two_back.n}; 2-back up in ${fx.two_back.n_positive} of ${fx.two_back.n}` : 'Computed by physionet_adapter.py from raw intensities';
+  const tNote = `n = ${P.tcd.two_back.n}; 2-back up in ${P.tcd.two_back.n_positive} of ${P.tcd.two_back.n}`;
+  const narrow = innerWidth < 640;
+  $('#tx-chart').innerHTML = `<svg viewBox="${narrow ? '0 0 270 590' : '0 0 560 280'}" xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--ink-3)" stroke-width="1" opacity=".35"/></pattern></defs>
+    ${real ? panel(0, 'fNIRS Â· PREFRONTAL HbO', 'change vs 0-back, in SD of own 0-back signal', fn, fe, 'var(--oxy)', false, v => sgn(v, 2, ''), fNote) : pending(0, 'fNIRS Â· PREFRONTAL HbO', 'change vs 0-back, in SD of own 0-back signal')}
+    <g transform="${narrow ? 'translate(-300 305)' : ''}">${panel(300, 'TCD Â· MCA BLOOD-FLOW VELOCITY', '% change vs preceding 0-back', tc, te, 'var(--deoxy)', false, v => sgn(v, 1, '%'), tNote)}</g>
+  </svg>`;
+  $('#tx-note').textContent = 'Mean Â± standard error, same participants and task. TCD measures blood-flow velocity in the middle cerebral artery; it is not Templeâ€™s Flow, and fNIRS is not either. '
+    + (P.source === 'summary' ? 'TCD values computed from the datasetâ€™s published per-session summary. ' : 'Computed by the pipeline from the PhysioNet files. ')
+    + (real ? 'fNIRS values depend on analysis assumptions (listed under Research).' : 'The fNIRS panel stays empty until the raw recordings have been processed.');
+  // research detail
+  const t2 = P.tcd.two_back, t1 = P.tcd.one_back, pfmt = p => p < .001 ? '< 0.001' : p.toFixed(3);
+  $('#pn-detail').innerHTML = `
+    <div><h4 class="label quiet">What it is</h4><p>14 healthy adults recruited (University of Oklahoma, 2018). 0-back, 1-back, 0-back, 2-back, about 134 s each. fNIRS over prefrontal cortex at 3.9 Hz and TCD over both middle cerebral arteries, recorded at the same time. Files shared: ${P.n_nirs_recordings} fNIRS and ${P.n_tcd_recordings} raw TCD recordings; the TCD summary covers all 14.</p></div>
+    <div><h4 class="label quiet">Result</h4><p>TCD, 2-back vs preceding 0-back: ${sgn(t2.mean, 1, '%')} Â± ${t2.sem.toFixed(1)}% (mean Â± SE), higher in ${t2.n_positive} of ${t2.n}, one-sided Wilcoxon p ${pfmt(t2.p_wilcoxon_greater)}. 1-back: ${sgn(t1.mean, 1, '%')} Â± ${t1.sem.toFixed(1)}%, ${t1.n_positive} of ${t1.n} higher, p ${pfmt(t1.p_wilcoxon_greater)}.</p>
+      <p>${real ? `fNIRS prefrontal HbO (analysis assumptions: Prahl extinction coefficients, DPF 6, 3 cm separation, 0.005â€“0.1 Hz band-pass, prefrontal channels 1â€“24), 2-back: ${sgn(fx.two_back.mean, 2, '')} SD Â± ${fx.two_back.sem.toFixed(2)}, higher in ${fx.two_back.n_positive} of ${fx.two_back.n}.` : 'fNIRS: pending. physionet_adapter.py computes it from raw 760/850 nm intensities using analysis assumptions, not dataset ground truth: Prahl extinction coefficients, DPF 6, 3 cm separation, 0.005â€“0.1 Hz band-pass, prefrontal channels 1â€“24.'}</p></div>
+    <div><h4 class="label quiet">Limits</h4><p>Small sample, one lab, one session each, exploratory test. The response appears at 2-back, not clearly at 1-back. TCD measures velocity in a large artery, fNIRS measures cortical oxygenation; neither is Templeâ€™s Flow. This supports asking the question on Temple hardware, nothing more.</p></div>`;
+})();
+
+/* ---------- personalization experiment ---------- */
+(function personalization() {
+  const P = REAL.personalization, box = $('#pz-chart'), note = $('#pz-note');
+  if (!P) {
+    box.innerHTML = `<svg viewBox="0 0 860 300"><defs><pattern id="hatch2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--ink-3)" stroke-width="1" opacity=".35"/></pattern></defs>
+      <rect x="1" y="1" width="858" height="298" fill="url(#hatch2)" stroke="var(--rule-strong)" stroke-dasharray="4 4"/>
+      <rect x="250" y="112" width="360" height="76" fill="var(--paper)"/>
+      <text x="430" y="146" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="1.6" style="fill:var(--ink)">PENDING REAL RESULTS</text>
+      <text x="430" y="170" text-anchor="middle" font-size="12">No values shown until personalize.py has run</text></svg>`;
+    note.textContent = 'Generic model first (k = 0), then the same model given 1, 2, 4 or 8 of the personâ€™s own labelled units. Metric: balanced accuracy.';
+    return;
+  }
+  const series = [];
+  if (P.refed) { series.push(['Feel Â· arousal', P.refed.arousal, 'var(--oxy)']); series.push(['Feel Â· valence', P.refed.valence, 'var(--deoxy)']); }
+  if (P.tufts) series.push(['Think Â· load', P.tufts.load, 'var(--ink)']);
+  const ks = P.ks, X = k => 80 + ks.indexOf(k) / (ks.length - 1) * 700;
+  const gains = series.flatMap(([, c]) => c.fine_tuned.filter(r => r.k > 0).flatMap(r => [r.gain_vs_generic + r.gain_sem, r.gain_vs_generic - r.gain_sem]));
+  const hi = Math.max(.02, ...gains) * 1.2, lo = Math.min(-.02, ...gains) * 1.2, Y = v => 30 + (hi - v) / (hi - lo) * 220;
+  let g = `<line x1="80" x2="780" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--rule-strong)" stroke-dasharray="4 4"/><text x="84" y="${Y(0) - 6}" font-size="11">generic model (k = 0)</text>`;
+  ks.forEach(k => g += `<text x="${X(k)}" y="282" font-size="11" text-anchor="middle">${k}</text>`);
+  g += `<text x="430" y="300" font-size="11" text-anchor="middle">own labelled units (videos or task blocks)</text>`;
+  [hi, 0, lo].forEach(v => g += `<text x="70" y="${Y(v) + 4}" font-size="11" text-anchor="end">${v >= 0 ? '+' : '\u2212'}${Math.abs(v * 100).toFixed(1)}</text>`);
+  g += `<text x="0" y="16" font-size="11">balanced accuracy vs generic, percentage points</text>`;
+  series.forEach(([name, c, col], i) => {
+    const rows = c.fine_tuned, pts = rows.map(r => [X(r.k), Y(r.k === 0 ? 0 : r.gain_vs_generic)]);
+    g += `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${col}" stroke-width="2"/>`;
+    // filled dot = reliable gain (Holm-corrected, CI excludes 0, beats chance); hollow = not reliable
+    rows.forEach(r => { if (r.k > 0) g += `<line x1="${X(r.k)}" x2="${X(r.k)}" y1="${Y(r.gain_vs_generic + r.gain_sem)}" y2="${Y(r.gain_vs_generic - r.gain_sem)}" stroke="${col}"/>`;
+      g += `<circle cx="${X(r.k)}" cy="${Y(r.k === 0 ? 0 : r.gain_vs_generic)}" r="4.5" fill="${r.k === 0 || r.significant ? col : 'var(--paper)'}" stroke="${col}" stroke-width="1.6"/>`; });
+  });
+  // series labels at the right edge, pushed apart so they never overlap
+  const labs = series.map(([name, c, col]) => { const l = c.fine_tuned[c.fine_tuned.length - 1]; return { name, col, x: X(l.k) + 12, y: Y(l.gain_vs_generic || 0) + 4 }; })
+    .sort((a, b) => a.y - b.y);
+  labs.forEach((l, i) => { if (i && l.y < labs[i - 1].y + 15) l.y = labs[i - 1].y + 15; });
+  labs.forEach(l => g += `<text x="${l.x}" y="${l.y}" font-size="12" style="fill:${l.col}">${l.name}</text>`);
+  g += `<circle cx="560" cy="12" r="4.5" fill="var(--ink)"/><text x="570" y="16" font-size="11">reliable gain</text><circle cx="670" cy="12" r="4.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.6"/><text x="680" y="16" font-size="11">not reliable</text>`;
+  box.innerHTML = `<svg viewBox="0 0 900 310">${g}</svg>`;
+  note.textContent = series.map(([name, c]) => { const b = c.fine_tuned[0], l = c.fine_tuned[c.fine_tuned.length - 1];
+    const ci = l.ci95 ? `, 95% CI ${l.ci95[0] >= 0 ? '+' : '\u2212'}${Math.abs(l.ci95[0] * 100).toFixed(1)} to ${l.ci95[1] >= 0 ? '+' : '\u2212'}${Math.abs(l.ci95[1] * 100).toFixed(1)} pts` : '';
+    const pr = l.p_wilcoxon_holm ?? l.p_wilcoxon;
+    const pv = pr != null ? `, ${l.p_wilcoxon_holm != null ? 'Holm-corrected ' : ''}p = ${pr < .001 ? '<0.001' : pr.toFixed(3)}` : '';
+    const verdict = l.significant ? 'a reliable gain' : 'not a reliable gain';
+    return `${name}: generic ${(b.bacc * 100).toFixed(1)}% â†’ ${(l.bacc * 100).toFixed(1)}% with ${l.k} own units (${l.n_improved} of ${l.n_people} people improved${ci}${pv}: ${verdict}; chance ${(c.chance_bacc * 100).toFixed(0)}%, shuffled labels ${c.shuffled_label_bacc != null ? (c.shuffled_label_bacc * 100).toFixed(0) + '%' : 'n/a'}).`; }).join(' ')
+    + ' Points: mean gain Â± standard error across held-out people. Chance is per person: 1 Ã· the number of levels in their test half.' + (SYN ? ' ' + SIM + '.' : '');
+})();
+
+/* ---------- ending + links ---------- */
+new IntersectionObserver(([e], o) => { if (e.isIntersecting) { setTimeout(() => $('#fin2').classList.add('on'), RM ? 0 : 2000); o.disconnect(); } }, { threshold: .6 }).observe($('#final .lede'));
+if (LINKS.live) $('#link-live').href = LINKS.live;
+if (LINKS.github) $('#link-gh').href = LINKS.github; else $('#link-gh').hidden = true;
+})();
+</script>
+</body>
+</html>
+
